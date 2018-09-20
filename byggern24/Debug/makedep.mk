@@ -8,6 +8,8 @@ joystick.c
 
 main.c
 
+oled_driver.c
+
 sram_driver.c
 
 usart_driver.c

@@ -40,6 +40,7 @@ C_SRCS +=  \
 ../adc_driver.c \
 ../joystick.c \
 ../main.c \
+../oled_driver.c \
 ../sram_driver.c \
 ../usart_driver.c
 
@@ -54,6 +55,7 @@ OBJS +=  \
 adc_driver.o \
 joystick.o \
 main.o \
+oled_driver.o \
 sram_driver.o \
 usart_driver.o
 
@@ -61,6 +63,7 @@ OBJS_AS_ARGS +=  \
 adc_driver.o \
 joystick.o \
 main.o \
+oled_driver.o \
 sram_driver.o \
 usart_driver.o
 
@@ -68,6 +71,7 @@ C_DEPS +=  \
 adc_driver.d \
 joystick.d \
 main.d \
+oled_driver.d \
 sram_driver.d \
 usart_driver.d
 
@@ -75,6 +79,7 @@ C_DEPS_AS_ARGS +=  \
 adc_driver.d \
 joystick.d \
 main.d \
+oled_driver.d \
 sram_driver.d \
 usart_driver.d
 
@@ -92,6 +97,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

@@ -6,6 +6,7 @@
 #include "sram_driver.h"
 #include "adc_driver.h"
 #include "joystick.h"
+#include "oled_driver.h"
 
 #define F_CPU 4915200 // clock frequency in Hz
 #define BAUD 9600
@@ -45,15 +46,10 @@ void test_latch()
 	_delay_ms(1000);                // wait 500 milliseconds
 }
 
-int main(void)
+void test_joystick ()
 {
-	USART_Init(MYUBRR);
-	SRAM_init();
-	joystick_init();
-	//SRAM_test();
-	
 	struct Position j_pos;
-	uint8_t sliderL; 
+	uint8_t sliderL;
 	uint8_t sliderR = 0;
 	
 	while(1)
@@ -67,4 +63,21 @@ int main(void)
 		
 		
 	}
+}
+
+int main(void)
+{
+	USART_Init(MYUBRR);
+	SRAM_init();
+	joystick_init();
+	//SRAM_test();
+	
+	oled_init();
+	oled_test();
+	
+	//test_joystick();
+	
+	
+	
+	
 }
