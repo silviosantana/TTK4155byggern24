@@ -1,17 +1,22 @@
 #include "stdio.h"
 #include "avr/io.h"
-#include "util/delay.h"
 
+#include "util.h"
 #include "usart_driver.h"
 #include "sram_driver.h"
+#include "adc_driver.h"
+#include "joystick.h"
 
 #define F_CPU 4915200 // clock frequency in Hz
 #define BAUD 9600
 #define MYUBRR F_CPU/16/BAUD-1
 
+#include "util/delay.h"
+
 
 void test_LED()
 {
+	DDRA = 0xFF;
 	// LED on
 	PORTA = 0b00000001;            // PC0 = High = Vcc
 	_delay_ms(1000);                // wait 500 milliseconds
@@ -43,26 +48,23 @@ void test_latch()
 int main(void)
 {
 	USART_Init(MYUBRR);
-	DDRA = 0xFF;
 	SRAM_init();
-	SRAM_test();
+	joystick_init();
+	//SRAM_test();
 	
- 	//uint16_t add = 1;
- 	//uint8_t val = 50;
+	struct Position j_pos;
+	uint8_t sliderL; 
+	uint8_t sliderR = 0;
 	
-	//SRAM_write(add, val);
-	//uint8_t read = SRAM_read(add);
-	//volatile char *ext_ram = (char *) 0x1880; // Start address for the SRAM
-	//ext_ram[0] = val;
-	//unsigned int read = ext_ram[0];
-	//printf("\r\nRECIEVED: %d", read);
-	
-	//uint8_t val = 147;
-	//volatile char *ext_ram = (char *) 0x14FD; // Start address for the SRAM
-	//ext_ram[0] = val;
-	//unsigned int read = ext_ram[0];
-	//printf("\r\nRECIEVED: %d", read);
 	while(1)
 	{
+		_delay_ms(500);
+		j_pos = get_joystick_position();
+		sliderL = get_left_slider();
+		sliderR = get_right_slider();
+		enum direction dir = get_joystick_direction();
+		printf("\r\nX: %d\t|\tY: %d\t|\tSL: %d\t|\tSR: %d |\tdir: %d", j_pos.x, j_pos.y, sliderL, sliderR, dir);
+		
+		
 	}
 }
