@@ -45,7 +45,7 @@ void oled_write_cmd(unsigned char ins_c)
 	ext_oled[0] = ins_c;
 }
 
-
+//clear OLED screen
 void oled_reset()
 {
 	oled_goto_line(0);
@@ -63,7 +63,7 @@ void oled_home()
 	
 }
 
-
+//go to specific page of OLED (0 - 7)
 void oled_goto_line(uint8_t line)
 {
 	oled_write_cmd(0x22);
@@ -71,7 +71,7 @@ void oled_goto_line(uint8_t line)
 	oled_write_cmd(7);
 }
 
-
+//go to specific column of OLED (0 - 127)
 void oled_goto_column(uint8_t column)
 {
 	oled_write_cmd(0x21);
@@ -80,6 +80,7 @@ void oled_goto_column(uint8_t column)
 }
 
 
+//clear all columns of specific page (0 - 7)
 void oled_clear_line(uint8_t line)
 {
 	oled_goto_line(line);
@@ -89,7 +90,7 @@ void oled_clear_line(uint8_t line)
 	}
 }
 
-
+//got to page and column (0 - 7 | 0 - 127)
 void oled_pos(uint8_t row,uint8_t column)
 {
 	oled_goto_line(row);
@@ -107,7 +108,8 @@ void oled_print_arrow(uint8_t row, uint8_t col)
 	oled_write_data(0b00011000);
 }
 
-
+//print a string starting on the current position
+//size: 1 - small | 2 - medium | 3 - large 
 void oled_print(char* name, int size)
 {
 	for (int i = 0; i < strlen(name); i++)
@@ -116,7 +118,8 @@ void oled_print(char* name, int size)
 	}
 }
 
-
+//print a character on the current position
+//size: 1 - small | 2 - medium | 3 - large
 void oled_print_char(char character, int size)
 {
 	char mychar;
@@ -160,68 +163,7 @@ void oled_print_special_char (int code)
 	}
 }
 
-/*
-void state_machine(int* current_state, int* arrow_max, int arrow_pos)
-{
-	oled_reset();
-	const char* states[4] = {"Main menu", "State 1", "State 2", "State 3"};
-	int parents[3] = {NULL, 0, 0, 0};
-		
-	if (*current_state == 0)
-	{
-		oled_pos(arrow_pos,100);
-		oled_print_special_char(5);
-		oled_pos(0,0);
-		oled_print(states[*current_state], 3);
-		oled_pos(2,0);
-		oled_print(states[1], 2);
-		oled_pos(3,0);
-		oled_print(states[2], 2);
-		oled_pos(4,0);
-		oled_print(states[3], 2);
-		*arrow_max = 4;
-	}
-}
-
-
-void move_arrow(int dir, int* current_state, int* arrow_max, int* arrow_pos)
-{
-	if (dir == 1) // left
-	{
-		//state_machine(1, *arrow_max, *arrow_pos)
-	}
-	else if (dir == 2) // right
-	{
-		//state_machine(1, *arrow_max, *arrow_pos)
-	}
-	else if (dir == 3) // up
-	{
-		oled_pos(*arrow_pos,100);
-		oled_print(" ", 3);
-		(*arrow_pos)--;
-		if (*arrow_pos == 1)
-		{
-			*arrow_pos = *arrow_max;
-		}
-		oled_pos(*arrow_pos,100);
-		oled_print_special_char(5);
-	}
-	else if (dir == 4) // down
-	{
-		oled_pos(*arrow_pos,100);
-		oled_print(" ", 3);
-		(*arrow_pos)++;
-		if (*arrow_pos == *arrow_max + 1)
-		{
-			*arrow_pos = 2;
-		}
-		oled_pos(*arrow_pos,100);
-		oled_print_special_char(5);
-	}
-}
-*/
-
-
+//set state of menu
 menu* state_machine(menu* current_state, int* arrow_max, int arrow_pos)
 {
 	oled_reset();
@@ -264,6 +206,7 @@ menu* state_machine(menu* current_state, int* arrow_max, int arrow_pos)
 	return current_state;
 }
 
+//move menu arrow to navigate among menu levels
 menu* move_arrow(int dir, menu* current_state, int* arrow_max, int* arrow_pos)
 {
 	if (dir == 1) // left
@@ -303,6 +246,7 @@ menu* move_arrow(int dir, menu* current_state, int* arrow_max, int* arrow_pos)
 	return current_state;
 }
 
+//write a specific pixel on (x,y)
 void write_pixel(int x, int y)
 {
 	int page = y / 8;
@@ -340,6 +284,7 @@ void write_pixel(int x, int y)
 	oled_write_data(data);
 }
 
+//draw a line
 void oled_line(int x0, int y0, int x1, int y1)
 {
 	if (x0 > x1)
@@ -367,6 +312,7 @@ void oled_line(int x0, int y0, int x1, int y1)
 	
 }
 
+//draw a circle
 void oled_circle(int x, int y, int r)
 {
 	int temp_x, temp_y;
@@ -444,34 +390,12 @@ void oled_test(){
 	/*oled_write_cmd(0x22);
 	oled_write_cmd(0x00);
 	oled_write_cmd(0x05);*/
-	
-	//oled_goto_line(4);
-	//oled_goto_column(39);
 
 	//oled_print_arrow(2, 64);
 	oled_animate_mario_large();
 
-// 	oled_pos(1, 5);
-// 	oled_print_special_char(0);
-// 	oled_pos(1,21);
-// 	oled_print_special_char(1);
-// 	oled_pos(1, 45);
-// 	oled_print_special_char(2);
-// 	oled_pos(1, 71);
-// 	oled_print_special_char(3);
-// 	oled_pos(1, 87);
-// 	oled_print_special_char(4);
-
-	
 	//oled_line(65, 63, 26, 12);
 	//oled_circle(80,30,21);
-// 	write_pixel(100,60);
-// 	write_pixel(64,39);
-	
-// 	for(int i = 0; i < 1024; i++)
-// 	{
-// 		oled_write_data(0xff);
-// 	}
 	
 	//oled_clear_line(6);
 	//oled_write_cmd(0x40);

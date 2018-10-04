@@ -9,9 +9,9 @@
 
 void oled_init();
 
-void write_d(unsigned char ins_d);
+void oled_write_data(unsigned char ins_d);
 
-void write_c(unsigned char ins_c);
+void oled_write_cmd(unsigned char ins_c);
 
 void oled_reset();
 
@@ -40,5 +40,9 @@ void write_pixel(int x, int y);
 void oled_line(int x0, int y0, int x1, int y1);
 
 void oled_circle(int x, int y, int r);
+
+void oled_animate_mario_large();
+
+void oled_print_mario_large(uint8_t row,uint8_t column);
 
 #endif

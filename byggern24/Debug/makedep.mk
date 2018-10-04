@@ -4,11 +4,15 @@
 
 adc_driver.c
 
+can_controller_driver.c
+
 joystick.c
 
 main.c
 
 oled_driver.c
+
+spi_driver.c
 
 sram_driver.c
 

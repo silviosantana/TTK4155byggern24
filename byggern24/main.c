@@ -7,6 +7,8 @@
 #include "adc_driver.h"
 #include "joystick.h"
 #include "oled_driver.h"
+#include "spi_driver.h"
+#include "can_controller_driver.h"
 
 #define F_CPU 4915200 // clock frequency in Hz
 #define BAUD 9600
@@ -128,14 +130,22 @@ int main(void)
 	SRAM_init();
 	joystick_init();
 	oled_init();
+	spi_init();
+	can_controller_init();
+	
+	
+	
+	
+	
 	//test_ui();
 	//SRAM_test();
 	
-	oled_test();
+	//oled_test();
 	
 	//test_joystick();
+	can_controller_test();
 	
 	
-	
+
 	
 }

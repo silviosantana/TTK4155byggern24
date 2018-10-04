@@ -115,6 +115,18 @@
     <Compile Include="adc_driver.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="can_controller_driver.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="can_controller_driver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="can_driver.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="can_driver.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="fonts.h">
       <SubType>compile</SubType>
     </Compile>
@@ -131,6 +143,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="oled_driver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi_driver.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi_driver.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="sram_driver.c">

@@ -19,4 +19,11 @@ typedef struct Menu
 	
 } menu;
 
+typedef struct Message
+{
+	uint8_t id[2];
+	uint8_t data[8];
+	uint8_t length;	
+} Message;
+
 #endif /* UTIL_H_ */
