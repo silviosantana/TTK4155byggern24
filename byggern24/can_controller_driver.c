@@ -103,6 +103,58 @@ void can_controller_write(uint8_t address, uint8_t data)
 	PORTB |= ~(1<<CAN_CS);
 }
 
+void can_controller_load_ID_to_buffer(uint8_t buffer, uint8_t* id)
+{
+	PORTB &= ~(1 << CAN_CS);
+
+	switch (buffer)
+	{
+	case 0:
+		spi_send(MCP_LOAD_TX0);
+		spi_send(id[0]);
+		spi_send(id[1]);
+		break;
+	case 1:
+		spi_send(MCP_LOAD_TX1);
+		spi_send(id[0]);
+		spi_send(id[1]);
+		break;
+	case 2:
+		spi_send(MCP_LOAD_TX2);
+		spi_send(id[0]);
+		spi_send(id[1]);
+		break;
+	}
+
+	PORTB |= ~(1 << CAN_CS);
+}
+
+void can_controller_load_data_to_buffer(uint8_t buffer, uint8_t* data)
+{
+	PORTB &= ~(1 << CAN_CS);
+
+	switch (buffer)
+	{
+	case 0:
+		spi_send(MCP_LOAD_TX0 + 1);
+		for (int i = 0; i < 8; ++i)
+			spi_send(data[i]);
+		break;
+	case 1:
+		spi_send(MCP_LOAD_TX1 + 1);
+		for (int i = 0; i < 8; ++i)
+			spi_send(data[i]);
+		break;
+	case 2:
+		spi_send(MCP_LOAD_TX2 + 1);
+		for (int i = 0; i < 8; ++i)
+			spi_send(data[i]);		
+		break;
+	}
+
+	PORTB |= ~(1 << CAN_CS);
+}
+
 void can_controller_test()
 {
 
