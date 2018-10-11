@@ -170,4 +170,9 @@ void can_controller_reset();
 
 uint8_t can_controller_read_status();
 
+void can_controller_load_ID_to_buffer(uint8_t buffer, uint8_t id);
+
+void can_controller_load_data_to_buffer(uint8_t buffer, uint8_t data);
+
+
 #endif
