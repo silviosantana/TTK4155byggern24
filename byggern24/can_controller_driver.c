@@ -56,12 +56,12 @@ uint8_t can_controller_set_mode(uint8_t mode)
 	return (modestat & MODE_MASK);
 }
 
-void can_controller_request_to_send(uint8_t buffer)
+void can_controller_request_to_send()
 {
 		PORTB &= ~(1<<CAN_CS);
 		
 		// The buffer types are MCP_RTS_TX0, MCP_RTS_TX1, MCP_RTS_TX2 and MCP_RTS_ALL
-		spi_send(buffer);
+		spi_send(MCP_RTS_TX0);
 
 		PORTB |= ~(1<<CAN_CS);
 }

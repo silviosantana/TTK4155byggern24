@@ -57,11 +57,24 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define MCP_CANINTE		0x2B
 #define MCP_CANINTF		0x2C
 #define MCP_EFLG		0x2D
+
+// Transfer buffer which is used
 #define MCP_TXB0CTRL	0x30
+#define MCP_TXB0SIDH    0x31
+#define MCP_TXB0SIDL	0x32
+#define MCP_TXB0DLC 	0x35
+#define MCP_TXB0Dm  	0x36
+
 #define MCP_TXB1CTRL	0x40
 #define MCP_TXB2CTRL	0x50
+
+// Receive buffer which is used
 #define MCP_RXB0CTRL	0x60
 #define MCP_RXB0SIDH	0x61
+#define MCP_RXB0SIDL	0x62
+#define MCP_RXB0DLC	    0x65
+#define MCP_RXB0Dm	    0x66
+
 #define MCP_RXB1CTRL	0x70
 #define MCP_RXB1SIDH	0x71
 
@@ -160,7 +173,7 @@ uint8_t can_controller_read(uint8_t address);
 
 void can_controller_write(uint8_t address, uint8_t data);
 
-void can_controller_request_to_send(uint8_t buffer);
+void can_controller_request_to_send();
 
 uint8_t can_controller_set_mode(uint8_t mode);
 
