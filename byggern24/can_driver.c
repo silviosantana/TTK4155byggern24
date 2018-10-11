@@ -4,6 +4,7 @@
 #include "can_driver.h"
 #include "can_controller_driver.h"
 
+
 #include "util/delay.h"
 
 ISR(INT1_vect)
@@ -77,6 +78,7 @@ void can_init ()
 uint8_t can_send_msg(can_message msg)
 {
 
+
 	//writhe higher id
 	can_controller_write(MCP_TXB0SIDH, msg.id);
     
@@ -111,6 +113,7 @@ uint8_t can_send_msg(can_message msg)
 
 
 // CALLED WHEN  AN INTERRUPTION OCCURS
+
 can_message can_recieve_msg(uint8_t buffer)
 {
 	can_message msg;
@@ -144,10 +147,11 @@ void can_driver_test()
 	msg.length = 3;
 	can_send_msg(msg);
 	
-msg.id = 5;
-msg.data[0] = 25;
-msg.data[1] = 52;
+	msg.id = 5;
+	msg.data[0] = 25;
+	msg.data[1] = 52;
 
-msg.length = 2;
+	msg.length = 2;
 	can_send_msg(msg);
 }
+
