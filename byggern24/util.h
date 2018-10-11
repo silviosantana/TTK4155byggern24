@@ -1,6 +1,11 @@
-
 #ifndef UTIL_H_
 #define UTIL_H_
+
+#include "stdint.h"
+
+#define F_CPU 4915200 // clock frequency in Hz
+#define BAUD 9600
+#define MYUBRR F_CPU/16/BAUD-1
 
 struct Position 
 {
@@ -19,11 +24,11 @@ typedef struct Menu
 	
 } menu;
 
-typedef struct Message
-{
-	uint8_t id[2];
+typedef struct {
+	uint8_t id;
+	uint8_t length;
 	uint8_t data[8];
-	uint8_t length;	
-} Message;
+} can_message;
+
 
 #endif /* UTIL_H_ */

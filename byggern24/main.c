@@ -9,10 +9,7 @@
 #include "oled_driver.h"
 #include "spi_driver.h"
 #include "can_controller_driver.h"
-
-#define F_CPU 4915200 // clock frequency in Hz
-#define BAUD 9600
-#define MYUBRR F_CPU/16/BAUD-1
+#include "can_driver.h"
 
 #include "util/delay.h"
 
@@ -126,12 +123,15 @@ void test_ui()
 
 int main(void)
 {
+	
 	USART_Init(MYUBRR);
 	SRAM_init();
 	joystick_init();
 	oled_init();
 	spi_init();
-	can_controller_init();
+	//can_controller_init();
+	printf("START============================\n\r");
+	can_init();
 	
 	
 	
@@ -143,7 +143,12 @@ int main(void)
 	//oled_test();
 	
 	//test_joystick();
-	can_controller_test();
+	//can_controller_test();
+	can_driver_test();
+
+	
+	printf("END   ============================\n\r");
+
 	
 	
 
