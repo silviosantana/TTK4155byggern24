@@ -1,5 +1,6 @@
 #include "util.h"
 #include "can_driver.h"
+#include "can_controller_driver.h"
 
 
 void can_init ()
@@ -13,6 +14,8 @@ void can_init ()
 
 uint8_t can_send_msg(Message msg, uint8_t buffer)
 {
+    can_controller_request_to_send(buffer);
+    
 	// LOAD TX BUFFER - load ID TXBnSIDH (2 TIMES)
 	// LOAD TX BUFFER - load DATA TXBnDm (msg.length TIMES)
 	// REQUEST SEND BUFFER n - buffer
