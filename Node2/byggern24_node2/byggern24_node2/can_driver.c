@@ -18,7 +18,7 @@ ISR(INT0_vect)
 	uint8_t canInt = can_controller_read(MCP_CANINTF);
 	if ((canInt & MCP_RX0IF) == MCP_RX0IF)
 	{
-		can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
+		
 		can_recieve_msg(0, msg);
 		
 		//printf("DATA ON RX0\n\r");
@@ -38,9 +38,11 @@ ISR(INT0_vect)
 	}else
 	{
 		printf("No message available on the CAN REX BUFFERs\n\r");
+		
 	}
+	printf("===========================================\n\r");
+	free(msg);
 	sei();
-	
 }
 
 void can_init ()
@@ -68,8 +70,6 @@ void can_init ()
 
 uint8_t can_send_msg(can_message* msg)
 {
-
-
 	//writhe higher id
 	can_controller_write(MCP_TXB0SIDH, msg->id);
 	
@@ -111,24 +111,33 @@ void can_recieve_msg(uint8_t buffer, can_message* msg)
 	//READ RX BUFFER - save DATA RXBnDm to Message.data (8 TIMES)
 	for (uint8_t byte = 0; byte < data_length; byte++) {
 		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
-	}	
+	}
+	can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
 }
 
 void can_driver_test()
 {
 	can_message* msg = (can_message *) malloc(1*sizeof(can_message));
-	msg->id = 1;
-	msg->data[0] = 25;
-	msg->data[1] = 38;
-	msg->data[2] = 95;
-	msg->data[3] = 25;
-	msg->data[4] = 38;
-	msg->data[5] = 95;
-	msg->data[6] = 38;
-	msg->data[7] = 95;
+	msg->id = 2;
+	msg->data[0] = 1;
+	msg->data[1] = 2;
+	msg->data[2] = 3;
+	msg->data[3] = 4;
+	msg->data[4] = 5;
+	msg->data[5] = 6;
+	msg->data[6] = 7;
+	msg->data[7] = 8;
 	msg->length = 8;
 	can_send_msg(msg);
+	free(msg);
 	
-	
-
+	msg = (can_message *) malloc(1*sizeof(can_message));
+	msg->id = 3;
+	msg->data[0] = 12;
+	msg->data[1] = 13;
+	msg->data[2] = 14;
+	msg->data[3] = 15;
+	msg->length = 4;
+	can_send_msg(msg);
+	free(msg);
 }

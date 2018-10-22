@@ -18,7 +18,6 @@ ISR(INT1_vect)
 	uint8_t canInt = can_controller_read(MCP_CANINTF);
 	if ((canInt & MCP_RX0IF) == MCP_RX0IF)
 	{
-		can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
 		can_recieve_msg(0, msg);
 		
 		printf("DATA ON RX0\n\r");
@@ -39,6 +38,8 @@ ISR(INT1_vect)
 	{
 		printf("No message available on the CAN REX BUFFERs\n\r");
 	}
+	printf("===========================================\n\r");
+	free(msg);
 	sei();
 	
 }
@@ -67,8 +68,6 @@ void can_init ()
 
 uint8_t can_send_msg(can_message* msg)
 {
-
-
 	//writhe higher id
 	can_controller_write(MCP_TXB0SIDH, msg->id);
     
@@ -81,10 +80,12 @@ uint8_t can_send_msg(can_message* msg)
 	for (uint8_t byte = 0; byte < data_length; byte++) {
 		can_controller_write(MCP_TXB0Dm + byte, data_bytes[byte]);
 	}
-
+	
+	while((can_controller_read(MCP_TXB0CTRL) & 0x08) != 0);
+	
 	// Request to send message, send if successful
 	can_controller_request_to_send();
-	_delay_ms(50);
+
 // 	printf("TXCTRL %02x\n\r", can_controller_read(0x30));
 // 	printf("TXCTRL %02x\n\r", can_controller_read(0x30));
 // 	printf("MCP_CANINTE %02x\n\r", can_controller_read(MCP_CANINTE)); 
@@ -110,6 +111,7 @@ void can_recieve_msg(uint8_t buffer, can_message* msg)
 	for (uint8_t byte = 0; byte < data_length; byte++) {
 		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
     }
+    can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
 	
 }
 

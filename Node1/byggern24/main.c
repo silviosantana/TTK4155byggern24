@@ -134,9 +134,6 @@ int main(void)
 	
 	can_driver_test();
 
-	
-
-	
 	while(1)
 	{
 		
