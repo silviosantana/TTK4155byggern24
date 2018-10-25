@@ -1,8 +1,7 @@
 #include <stdio.h>
 
 #include "avr/io.h"
-#include "util/delay.h"
-#include "util.h"
+
 #include "usart_driver.h"
 #include "sram_driver.h"
 #include "adc_driver.h"
@@ -11,6 +10,9 @@
 #include "spi_driver.h"
 #include "can_controller_driver.h"
 #include "can_driver.h"
+
+#include "util/delay.h"
+#include "util.h"
 
 void test_LED()
 {
@@ -119,6 +121,29 @@ void test_ui()
 	}
 }
 
+void test_send_joystick()
+{
+	struct Position j_pos;
+	uint8_t sliderL;
+	uint8_t sliderR = 0;
+	
+	j_pos = get_joystick_position();
+	sliderL = get_left_slider();
+	sliderR = get_right_slider();
+	enum direction dir = get_joystick_direction();
+	
+	can_message msg;
+	msg.id = 1;
+	msg.data[0] = j_pos.x;
+	msg.data[1] = j_pos.y;
+	msg.data[2] = sliderL;
+	msg.data[3] = sliderR;
+	msg.data[4] = dir;
+	msg.length = 5;
+	
+	can_send_msg(&msg);
+}
+
 int main(void)
 {
 	// Initializations
@@ -132,12 +157,18 @@ int main(void)
 	
 	printf("START============================\n\r");
 	
-	can_driver_test();
-
-	while(1)
+	//can_driver_test();
+	
+	
+	uint8_t test = -100;
+	printf("TESTE: %d\n\r",test);
+	
+	while (1)
 	{
-		
+		test_send_joystick();
+		_delay_ms(200);
 	}
+	
 
 	printf("END   ============================\n\r");
 }

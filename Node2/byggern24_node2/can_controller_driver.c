@@ -7,7 +7,7 @@
 #include "spi_driver.h"
 #include "util.h"
 
-#define CAN_CS PB4
+#define CAN_CS PB7
 
 void can_controller_reset()
 {
@@ -19,33 +19,33 @@ void can_controller_reset()
 
 uint8_t can_controller_init()
 {
-    uint8_t value;
+	uint8_t value;
 
-    //spi_init(); // Initialize SPI
-    can_controller_reset(); // Send reset-command
+	//spi_init(); // Initialize SPI
+	can_controller_reset(); // Send reset-command
 	
 
-    // Self-test
-    value = can_controller_read(MCP_CANSTAT);
-    if ((value & MODE_MASK)  != MODE_CONFIG) 
-    {
-        printf("%d can_controller is NOT in configuration mode after reset!\n\r", value);
-        return 1;
-    }
+	// Self-test
+	value = can_controller_read(MCP_CANSTAT);
+	if ((value & MODE_MASK)  != MODE_CONFIG)
+	{
+		printf("%d can_controller is NOT in configuration mode after reset!\n\r", value);
+		return 1;
+	}
 	
 	//printf("mode value: %d\n\r", (value & MODE_MASK));
 	
 	//turn RXM1 and RXM0 to 11 to turn off filters and receive any messages
-	can_controller_bit_modify(MCP_CANINTE, 0b11111111, 0b00000011);
+	can_controller_bit_modify(MCP_CANINTE, 0b11111111, 0b00000001);
 	can_controller_bit_modify(MCP_RXB0CTRL, 0b01100100, 0b01100100);
 	//printf("RBX0CTRL: %02x\n\r", can_controller_read(MCP_RXB0CTRL));
 	can_controller_bit_modify(MCP_RXB1CTRL, 0b01100000, 0b01100000);
 	//printf("RBX1CTRL: %02x\n\r", can_controller_read(MCP_RXB1CTRL));
 
-    
+	
 	//Set lower ID reg to zero
-	can_controller_write(MCP_TXB0SIDL, 0x00);	
-    return 0;
+	can_controller_write(MCP_TXB0SIDL, 0x00);
+	return 0;
 }
 
 uint8_t can_controller_read(uint8_t address)
@@ -73,24 +73,24 @@ uint8_t can_controller_set_mode(uint8_t mode)
 
 void can_controller_request_to_send()
 {
-		PORTB &= ~(1<<CAN_CS);
-		
-		// The buffer types are MCP_RTS_TX0, MCP_RTS_TX1, MCP_RTS_TX2 and MCP_RTS_ALL
-		spi_send(MCP_RTS_TX0);
+	PORTB &= ~(1<<CAN_CS);
+	
+	// The buffer types are MCP_RTS_TX0, MCP_RTS_TX1, MCP_RTS_TX2 and MCP_RTS_ALL
+	spi_send(MCP_RTS_TX0);
 
-		PORTB |= ~(1<<CAN_CS);
+	PORTB |= ~(1<<CAN_CS);
 }
 
 void can_controller_bit_modify(uint8_t address, uint8_t mask, uint8_t data)
 {
-		PORTB &= ~(1<<CAN_CS); // Select CAN-controller
+	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
 
-		spi_send(MCP_BITMOD); // Send read instruction
-		spi_send(address); // Send address
-		spi_send(mask); // Send mask,
-		spi_send(data); // Send data
+	spi_send(MCP_BITMOD); // Send read instruction
+	spi_send(address); // Send address
+	spi_send(mask); // Send mask,
+	spi_send(data); // Send data
 
-		PORTB |= (1<<CAN_CS); // Deselect CAN-controller
+	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
 }
 
 uint8_t can_controller_read_status()
@@ -124,17 +124,17 @@ void can_controller_load_ID_to_buffer(uint8_t buffer, uint8_t* id)
 
 	switch (buffer)
 	{
-	case 0:
+		case 0:
 		spi_send(MCP_LOAD_TX0);
 		spi_send(id[0]);
 		spi_send(id[1]);
 		break;
-	case 1:
+		case 1:
 		spi_send(MCP_LOAD_TX1);
 		spi_send(id[0]);
 		spi_send(id[1]);
 		break;
-	case 2:
+		case 2:
 		spi_send(MCP_LOAD_TX2);
 		spi_send(id[0]);
 		spi_send(id[1]);
@@ -150,20 +150,20 @@ void can_controller_load_data_to_buffer(uint8_t buffer, uint8_t* data)
 
 	switch (buffer)
 	{
-	case 0:
+		case 0:
 		spi_send(MCP_LOAD_TX0 + 1);
 		for (int i = 0; i < 8; ++i)
-			spi_send(data[i]);
+		spi_send(data[i]);
 		break;
-	case 1:
+		case 1:
 		spi_send(MCP_LOAD_TX1 + 1);
 		for (int i = 0; i < 8; ++i)
-			spi_send(data[i]);
+		spi_send(data[i]);
 		break;
-	case 2:
+		case 2:
 		spi_send(MCP_LOAD_TX2 + 1);
 		for (int i = 0; i < 8; ++i)
-			spi_send(data[i]);		
+		spi_send(data[i]);
 		break;
 	}
 

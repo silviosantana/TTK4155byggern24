@@ -174,17 +174,6 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define MCP_WAKIF		0x40
 #define MCP_MERRF		0x80
 
-// CANINTE Register Bits
-
-#define MCP_RX0IE		0x01
-#define MCP_RX1IE		0x02
-#define MCP_TX0IE		0x04
-#define MCP_TX1IE		0x08
-#define MCP_TX2IE		0x10
-#define MCP_ERRIE		0x20
-#define MCP_WAKIE		0x40
-#define MCP_MERRE		0x80
-
 uint8_t can_controller_init();
 
 uint8_t can_controller_read(uint8_t address);
@@ -204,5 +193,7 @@ uint8_t can_controller_set_mode(uint8_t mode);
 void can_controller_load_ID_to_buffer(uint8_t buffer, uint8_t* id);
 
 void can_controller_load_data_to_buffer(uint8_t buffer, uint8_t* data);
+
+void can_controller_test();
 
 #endif

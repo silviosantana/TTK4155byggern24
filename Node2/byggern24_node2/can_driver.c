@@ -7,9 +7,10 @@
 #include "util/delay.h"
 #include "util.h"
 #include "can_controller_driver.h"
+#include "usart_driver.h"
 
 
-ISR(INT1_vect)
+ISR(INT0_vect)
 {
 	cli();
 	can_message* msg = (can_message *) malloc(1*sizeof(can_message));
@@ -21,20 +22,22 @@ ISR(INT1_vect)
 	{
 		can_recieve_msg(0, msg);
 		
-		printf("DATA ON RX0:\n\r");
+		printf("X:\tY:\tLeft:\tRight:\tDirection:\n\r");
 		for (uint8_t byte = 0; byte < msg->length; byte++) {
-			printf("%d \n\r", msg->data[byte]);
+			printf("%d \t", (int8_t) msg->data[byte]);
 		}
+		printf("\n\r");
 		
-	}else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
-	{
-		can_recieve_msg(1, msg);
-
-		printf("DATA ON RX1\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
-			printf("%d \n\r", msg->data[byte]);
-		}
 	}
+// 	else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
+// 	{
+// 		can_recieve_msg(1, msg);
+// 		
+// 		printf("DATA ON RX1\n\r");
+// 		for (uint8_t byte = 0; byte < msg->length; byte++) {
+// 			printf("%d \n\r", msg->data[byte]);
+// 		}
+// 	}
 	else
 	{
 		can_controller_write(MCP_CANINTF, 0x00);
@@ -44,15 +47,21 @@ ISR(INT1_vect)
 		sei();
 		return;
 	}
-	printf("before:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
+	//printf("before:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
 	can_controller_write(MCP_CANINTF, 0x00);
 	//can_controller_write(MCP_EFLG, 0x00);
-	printf("aftah:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
-	printf("===========================================\n\r");
+	//printf("aftah:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
+	//printf("===========================================\n\r");
 	free(msg);
 	can_controller_write(MCP_CANINTF, 0x00);
 	sei();
 }
+
+// ISR(INT0_vect)
+// {
+// 	msg_flag = 1;
+// 	printf("FLAG SET: %d\n\r", msg_flag);
+// }
 
 void can_init ()
 {
@@ -62,19 +71,20 @@ void can_init ()
 	{
 		printf("Could not set normal mode! I am sorry!\n\r");
 	}
-		
+	
 	//enable RX interrupts
 	//can_controller_bit_modify(MCP_CANINTE, MCP_RX_INT, MCP_RX_INT);
 	//can_controller_write(MCP_CANINTE, MCP_RX_INT);
 	
 	// SET UP INTERRUPTION TO RECIEVE MESSAGE
-	//DDRD &= ~(1<<PD3);
+	//DDRD &= ~(1<<PD0);
 	cli();
-	MCUCR |= (1 << ISC11);
-	MCUCR &= ~(1 << ISC10);	//interrupt on the falling edge
+	EICRA &= ~(1 << ISC00);
+	EICRA |= (1 << ISC01);	//interrupt on the falling edge
+	
+	EIMSK |= (1 << INT0);						//enable external interrupt INT0
 	can_controller_write(MCP_CANINTF, 0x00);
 	can_controller_write(MCP_EFLG, 0x00);
-	GICR |= (1 << INT1);						//enable external interrupt INT1
 	sei();									//enable Global Interrupt
 }
 
@@ -123,12 +133,50 @@ void can_recieve_msg(uint8_t buffer, can_message* msg)
 		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
 	}
 	//can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
-	// 	can_controller_write(MCP_CANINTF, 0x00);
-	// 	can_controller_write(MCP_EFLG, 0x00);
+// 	can_controller_write(MCP_CANINTF, 0x00);
+// 	can_controller_write(MCP_EFLG, 0x00);
 }
+
 void can_driver_test()
 {
+	can_message msg;
+	printf("enter can driver test \n\r");
+	msg.id = 1;
+	msg.data[0] = 25;
+	msg.data[1] = 38;
+	msg.data[2] = 95;
+	msg.length = 3;
+	can_send_msg(&msg);
 	
+	_delay_ms(100);
+	
+	msg.id = 5;
+	msg.data[0] = 72;
+	msg.data[1] = 58;
+
+	msg.length = 2;
+	can_send_msg(&msg);
+
+
+// 	msg_flag = 0;
+// 	can_message msg;
+// 	int i = 0;
+// 	while (1)
+// 	{
+// 		printf("FLAG while: %d\n\r", msg_flag);
+// 		if (msg_flag == 1)
+// 		{
+// 			printf("FLAG READ: %d\n\r", msg_flag);
+// 			can_recieve_msg(0, &msg);
+// 			printf("message INTERRUPTION recieved\n\r");
+// 			for (uint8_t byte = 0; byte < msg.length; byte++) {
+// 				printf("%d \n\r", msg.data[byte]);
+// 			}
+// 			msg_flag = 0;
+// 		}
+// 	}
+// 	
+
 // 	int count = 10;
 // 	while (1)
 // 	{
@@ -138,29 +186,11 @@ void can_driver_test()
 // 		msg.data[2] = 47;
 // 		msg.id = 1;
 // 		msg.length = 3;
-// 		
+// 	
 // 		count += 20;
 // 		can_send_msg(&msg);
-// 		
+// 	
 // 		_delay_ms(3000);
 // 	}
-// 	
-// 	
-// 	can_message msg;
-// 	printf("enter can driver test \n\r");
-// 	msg.id = 1;
-// 	msg.data[0] = 25;
-// 	msg.data[1] = 38;
-// 	msg.data[2] = 95;
-// 	msg.length = 3;
-// 	can_send_msg(&msg);
-// 	
-// 	_delay_ms(40);
-// 	
-// 	msg.id = 5;
-// 	msg.data[0] = 72;
-// 	msg.data[1] = 58;
-// 
-// 	msg.length = 2;
-// 	can_send_msg(&msg);
+
 }
