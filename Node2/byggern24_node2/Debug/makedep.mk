@@ -10,5 +10,7 @@ main.c
 
 spi_driver.c
 
+timer_driver.c
+
 usart_driver.c
 

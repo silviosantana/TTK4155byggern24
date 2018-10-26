@@ -7,8 +7,10 @@
 #define F_CPU F_OSC
 #define BAUD 9600
 #define MYUBRR F_CPU/16UL/BAUD-1
+#define set_bit(reg, bit) (reg |= (1 << bit))
+#define clear_bit(reg, bit) (reg &= ~(1 << bit))
 
-struct Position 
+struct Position
 {
 	int x;
 	int y;

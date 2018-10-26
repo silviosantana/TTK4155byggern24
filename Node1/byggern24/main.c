@@ -166,7 +166,7 @@ int main(void)
 	while (1)
 	{
 		test_send_joystick();
-		_delay_ms(200);
+		_delay_ms(50);
 	}
 	
 

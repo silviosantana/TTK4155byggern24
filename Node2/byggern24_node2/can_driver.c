@@ -8,6 +8,7 @@
 #include "util.h"
 #include "can_controller_driver.h"
 #include "usart_driver.h"
+#include "timer_driver.h"
 
 
 ISR(INT0_vect)
@@ -22,10 +23,11 @@ ISR(INT0_vect)
 	{
 		can_recieve_msg(0, msg);
 		
-		printf("X:\tY:\tLeft:\tRight:\tDirection:\n\r");
+		//printf("X:\tY:\tLeft:\tRight:\tDirection:\n\r");
 		for (uint8_t byte = 0; byte < msg->length; byte++) {
 			printf("%d \t", (int8_t) msg->data[byte]);
 		}
+		timer_driver_set_duty_cycle(msg->data[0]);
 		printf("\n\r");
 		
 	}
@@ -79,10 +81,9 @@ void can_init ()
 	// SET UP INTERRUPTION TO RECIEVE MESSAGE
 	//DDRD &= ~(1<<PD0);
 	cli();
-	EICRA &= ~(1 << ISC00);
-	EICRA |= (1 << ISC01);	//interrupt on the falling edge
-	
-	EIMSK |= (1 << INT0);						//enable external interrupt INT0
+	clear_bit(EICRA, ISC00);
+	set_bit(EICRA, ISC01); //interrupt on the falling edge
+	set_bit(EIMSK, INT0); //enable external interrupt INT0
 	can_controller_write(MCP_CANINTF, 0x00);
 	can_controller_write(MCP_EFLG, 0x00);
 	sei();									//enable Global Interrupt

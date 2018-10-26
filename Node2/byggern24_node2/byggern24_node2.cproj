@@ -157,6 +157,12 @@
     <Compile Include="spi_driver.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="timer_driver.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="timer_driver.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="usart_driver.c">
       <SubType>compile</SubType>
     </Compile>

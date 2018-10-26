@@ -191,12 +191,6 @@ Disassembly of section .text:
  122:	6e cf       	rjmp	.-292    	; 0x0 <__vectors>
 
 00000124 <can_controller_reset>:
-	status = spi_read();
-
-	PORTB |= ~(1<<CAN_CS);
-
-	return status;
-}
  124:	2f 98       	cbi	0x05, 7	; 5
  126:	80 ec       	ldi	r24, 0xC0	; 192
  128:	b5 d1       	rcall	.+874    	; 0x494 <spi_send>
@@ -264,54 +258,30 @@ Disassembly of section .text:
  194:	08 95       	ret
 
 00000196 <can_controller_write>:
-
-void can_controller_write(uint8_t address, uint8_t data)
-{
  196:	cf 93       	push	r28
  198:	df 93       	push	r29
  19a:	d8 2f       	mov	r29, r24
  19c:	c6 2f       	mov	r28, r22
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
  19e:	2f 98       	cbi	0x05, 7	; 5
-	
-	spi_send(MCP_WRITE);
  1a0:	82 e0       	ldi	r24, 0x02	; 2
  1a2:	78 d1       	rcall	.+752    	; 0x494 <spi_send>
-	spi_send(address);
  1a4:	8d 2f       	mov	r24, r29
  1a6:	76 d1       	rcall	.+748    	; 0x494 <spi_send>
-	spi_send(data);
  1a8:	8c 2f       	mov	r24, r28
  1aa:	74 d1       	rcall	.+744    	; 0x494 <spi_send>
-
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
  1ac:	2f 9a       	sbi	0x05, 7	; 5
-}
  1ae:	df 91       	pop	r29
  1b0:	cf 91       	pop	r28
  1b2:	08 95       	ret
 
 000001b4 <can_controller_init>:
-uint8_t can_controller_init()
-{
-	uint8_t value;
-
-	//spi_init(); // Initialize SPI
-	can_controller_reset(); // Send reset-command
  1b4:	b7 df       	rcall	.-146    	; 0x124 <can_controller_reset>
-	
-
-	// Self-test
-	value = can_controller_read(MCP_CANSTAT);
  1b6:	8e e0       	ldi	r24, 0x0E	; 14
  1b8:	c0 df       	rcall	.-128    	; 0x13a <can_controller_read>
-	if ((value & MODE_MASK)  != MODE_CONFIG)
  1ba:	98 2f       	mov	r25, r24
  1bc:	90 7e       	andi	r25, 0xE0	; 224
  1be:	90 38       	cpi	r25, 0x80	; 128
  1c0:	69 f0       	breq	.+26     	; 0x1dc <can_controller_init+0x28>
-	{
-		printf("%d can_controller is NOT in configuration mode after reset!\n\r", value);
  1c2:	1f 92       	push	r1
  1c4:	8f 93       	push	r24
  1c6:	86 e0       	ldi	r24, 0x06	; 6
@@ -319,56 +289,31 @@ uint8_t can_controller_init()
  1ca:	9f 93       	push	r25
  1cc:	8f 93       	push	r24
  1ce:	f9 d2       	rcall	.+1522   	; 0x7c2 <printf>
-		return 1;
  1d0:	0f 90       	pop	r0
  1d2:	0f 90       	pop	r0
  1d4:	0f 90       	pop	r0
  1d6:	0f 90       	pop	r0
  1d8:	81 e0       	ldi	r24, 0x01	; 1
  1da:	08 95       	ret
-	}
-	
-	//printf("mode value: %d\n\r", (value & MODE_MASK));
-	
-	//turn RXM1 and RXM0 to 11 to turn off filters and receive any messages
-	can_controller_bit_modify(MCP_CANINTE, 0b11111111, 0b00000001);
  1dc:	41 e0       	ldi	r20, 0x01	; 1
  1de:	6f ef       	ldi	r22, 0xFF	; 255
  1e0:	8b e2       	ldi	r24, 0x2B	; 43
  1e2:	bd df       	rcall	.-134    	; 0x15e <can_controller_bit_modify>
-	can_controller_bit_modify(MCP_RXB0CTRL, 0b01100000, 0b01100000);
  1e4:	40 e6       	ldi	r20, 0x60	; 96
  1e6:	60 e6       	ldi	r22, 0x60	; 96
  1e8:	80 e6       	ldi	r24, 0x60	; 96
  1ea:	b9 df       	rcall	.-142    	; 0x15e <can_controller_bit_modify>
-	//can_controller_bit_modify(MCP_RXB1CTRL, 0b01100000, 0b01100000);
-	//printf("RBX1CTRL: %02x\n\r", can_controller_read(MCP_RXB1CTRL));
-
-	
-	//Set lower ID reg to zero
-	can_controller_write(MCP_TXB0SIDL, 0x00);
  1ec:	60 e0       	ldi	r22, 0x00	; 0
  1ee:	82 e3       	ldi	r24, 0x32	; 50
  1f0:	d2 df       	rcall	.-92     	; 0x196 <can_controller_write>
-	return 0;
  1f2:	80 e0       	ldi	r24, 0x00	; 0
-}
  1f4:	08 95       	ret
 
 000001f6 <can_init>:
-}
-
-void can_init ()
-{
-	//set loopback mode
-	uint8_t mode = can_controller_set_mode(MODE_NORMAL);
  1f6:	80 e0       	ldi	r24, 0x00	; 0
  1f8:	c6 df       	rcall	.-116    	; 0x186 <can_controller_set_mode>
-	if (mode != MODE_NORMAL)
  1fa:	88 23       	and	r24, r24
  1fc:	39 f0       	breq	.+14     	; 0x20c <can_init+0x16>
-	{
-		printf("Could not set normal mode! I am sorry!\n\r");
  1fe:	83 e5       	ldi	r24, 0x53	; 83
  200:	92 e0       	ldi	r25, 0x02	; 2
  202:	9f 93       	push	r25
@@ -376,88 +321,48 @@ void can_init ()
  206:	dd d2       	rcall	.+1466   	; 0x7c2 <printf>
  208:	0f 90       	pop	r0
  20a:	0f 90       	pop	r0
-	}
-	
-	//enable RX interrupts
-	can_controller_bit_modify(MCP_CANINTE, MCP_RX_INT, MCP_RX_INT);
  20c:	43 e0       	ldi	r20, 0x03	; 3
  20e:	63 e0       	ldi	r22, 0x03	; 3
  210:	8b e2       	ldi	r24, 0x2B	; 43
  212:	a5 df       	rcall	.-182    	; 0x15e <can_controller_bit_modify>
-	//can_controller_write(MCP_CANINTE, MCP_RX_INT);
-	
-	// SET UP INTERRUPTION TO RECIEVE MESSAGE
-	DDRD &= ~(1<<PD0);
  214:	50 98       	cbi	0x0a, 0	; 10
-	cli();
  216:	f8 94       	cli
-	EICRA &= ~(1 << ISC01);
  218:	e9 e6       	ldi	r30, 0x69	; 105
  21a:	f0 e0       	ldi	r31, 0x00	; 0
  21c:	80 81       	ld	r24, Z
  21e:	8d 7f       	andi	r24, 0xFD	; 253
  220:	80 83       	st	Z, r24
-	EICRA |= (1 << ISC00);	//interrupt on the falling edge
  222:	80 81       	ld	r24, Z
  224:	81 60       	ori	r24, 0x01	; 1
  226:	80 83       	st	Z, r24
-	
-	EIMSK |= (1 << INT0);						//enable external interrupt INT0
  228:	e8 9a       	sbi	0x1d, 0	; 29
-	sei();									//enable Global Interrupt
  22a:	78 94       	sei
  22c:	08 95       	ret
 
 0000022e <can_send_msg>:
-}
-
-uint8_t can_send_msg(can_message* msg)
-{
  22e:	0f 93       	push	r16
  230:	1f 93       	push	r17
  232:	cf 93       	push	r28
  234:	df 93       	push	r29
  236:	ec 01       	movw	r28, r24
-	//writhe higher id
-	can_controller_write(MCP_TXB0SIDH, msg->id);
  238:	68 81       	ld	r22, Y
  23a:	81 e3       	ldi	r24, 0x31	; 49
  23c:	ac df       	rcall	.-168    	; 0x196 <can_controller_write>
-	
-	// Define data length of message
-	uint8_t data_length = msg->length;
  23e:	09 81       	ldd	r16, Y+1	; 0x01
-	can_controller_write(MCP_TXB0DLC, msg->length);
  240:	60 2f       	mov	r22, r16
  242:	85 e3       	ldi	r24, 0x35	; 53
  244:	a8 df       	rcall	.-176    	; 0x196 <can_controller_write>
-	
-	// Write data bytes to transmit buffer
-	uint8_t* data_bytes = msg->data;
  246:	22 96       	adiw	r28, 0x02	; 2
-	for (uint8_t byte = 0; byte < data_length; byte++) {
  248:	00 23       	and	r16, r16
  24a:	41 f0       	breq	.+16     	; 0x25c <can_send_msg+0x2e>
  24c:	0a 5c       	subi	r16, 0xCA	; 202
  24e:	16 e3       	ldi	r17, 0x36	; 54
-		can_controller_write(MCP_TXB0Dm + byte, data_bytes[byte]);
  250:	69 91       	ld	r22, Y+
  252:	81 2f       	mov	r24, r17
  254:	a0 df       	rcall	.-192    	; 0x196 <can_controller_write>
  256:	1f 5f       	subi	r17, 0xFF	; 255
-	uint8_t data_length = msg->length;
-	can_controller_write(MCP_TXB0DLC, msg->length);
-	
-	// Write data bytes to transmit buffer
-	uint8_t* data_bytes = msg->data;
-	for (uint8_t byte = 0; byte < data_length; byte++) {
  258:	10 13       	cpse	r17, r16
  25a:	fa cf       	rjmp	.-12     	; 0x250 <can_send_msg+0x22>
-		can_controller_write(MCP_TXB0Dm + byte, data_bytes[byte]);
-	}
-
-	// Request to send message, send if successful
-	can_controller_request_to_send();
  25c:	79 df       	rcall	.-270    	; 0x150 <can_controller_request_to_send>
 	#else
 		//round up by default
@@ -474,12 +379,6 @@ uint8_t can_send_msg(can_message* msg)
  26a:	e1 f7       	brne	.-8      	; 0x264 <can_send_msg+0x36>
  26c:	00 c0       	rjmp	.+0      	; 0x26e <can_send_msg+0x40>
  26e:	00 00       	nop
-	// 	printf("MCP_CANINTE %02x\n\r", can_controller_read(MCP_CANINTE));
-	// 	printf("CANINTF %02x\n\r", can_controller_read(MCP_CANINTF));
-	// 	printf("EFLG %02x\n\r", can_controller_read(MCP_EFLG));
-	// 	printf("MCP_RXB0CTRL %02x\n\r", can_controller_read(MCP_RXB0CTRL));
-	
-}
  270:	df 91       	pop	r29
  272:	cf 91       	pop	r28
  274:	1f 91       	pop	r17
@@ -487,66 +386,39 @@ uint8_t can_send_msg(can_message* msg)
  278:	08 95       	ret
 
 0000027a <can_recieve_msg>:
-
-// CALLED WHEN  AN INTERRUPTION OCCURS
-void can_recieve_msg(uint8_t buffer, can_message* msg)
-{
  27a:	0f 93       	push	r16
  27c:	1f 93       	push	r17
  27e:	cf 93       	push	r28
  280:	df 93       	push	r29
  282:	eb 01       	movw	r28, r22
-
-	//READ RX BUFFER - save ID on RXBnSIDH to Message.id (2 TIMES)
-	uint8_t id_high = can_controller_read(MCP_RXB0SIDH + buffer*16);
  284:	18 2f       	mov	r17, r24
  286:	12 95       	swap	r17
  288:	10 7f       	andi	r17, 0xF0	; 240
  28a:	81 e6       	ldi	r24, 0x61	; 97
  28c:	81 0f       	add	r24, r17
  28e:	55 df       	rcall	.-342    	; 0x13a <can_controller_read>
-	uint8_t mask;
-
-
-	uint8_t data_length = can_controller_read(MCP_RXB0DLC + buffer*16);
  290:	85 e6       	ldi	r24, 0x65	; 101
  292:	81 0f       	add	r24, r17
  294:	52 df       	rcall	.-348    	; 0x13a <can_controller_read>
-	mask = 0x0F;
-	msg->length = (data_length & mask);
  296:	98 2f       	mov	r25, r24
  298:	9f 70       	andi	r25, 0x0F	; 15
  29a:	99 83       	std	Y+1, r25	; 0x01
-
-	//READ RX BUFFER - save DATA RXBnDm to Message.data (8 TIMES)
-	for (uint8_t byte = 0; byte < data_length; byte++) {
  29c:	88 23       	and	r24, r24
  29e:	51 f0       	breq	.+20     	; 0x2b4 <can_recieve_msg+0x3a>
  2a0:	1a 59       	subi	r17, 0x9A	; 154
  2a2:	22 96       	adiw	r28, 0x02	; 2
  2a4:	08 2f       	mov	r16, r24
  2a6:	01 0f       	add	r16, r17
-		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
  2a8:	81 2f       	mov	r24, r17
  2aa:	47 df       	rcall	.-370    	; 0x13a <can_controller_read>
  2ac:	89 93       	st	Y+, r24
  2ae:	1f 5f       	subi	r17, 0xFF	; 255
-	uint8_t data_length = can_controller_read(MCP_RXB0DLC + buffer*16);
-	mask = 0x0F;
-	msg->length = (data_length & mask);
-
-	//READ RX BUFFER - save DATA RXBnDm to Message.data (8 TIMES)
-	for (uint8_t byte = 0; byte < data_length; byte++) {
  2b0:	10 13       	cpse	r17, r16
  2b2:	fa cf       	rjmp	.-12     	; 0x2a8 <can_recieve_msg+0x2e>
-		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
-	}
-	can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
  2b4:	40 e0       	ldi	r20, 0x00	; 0
  2b6:	61 e0       	ldi	r22, 0x01	; 1
  2b8:	8c e2       	ldi	r24, 0x2C	; 44
  2ba:	51 df       	rcall	.-350    	; 0x15e <can_controller_bit_modify>
-}
  2bc:	df 91       	pop	r29
  2be:	cf 91       	pop	r28
  2c0:	1f 91       	pop	r17
@@ -554,12 +426,6 @@ void can_recieve_msg(uint8_t buffer, can_message* msg)
  2c4:	08 95       	ret
 
 000002c6 <__vector_1>:
-#include "util.h"
-#include "can_controller_driver.h"
-
-
-ISR(INT0_vect)
-{
  2c6:	1f 92       	push	r1
  2c8:	0f 92       	push	r0
  2ca:	0f b6       	in	r0, 0x3f	; 63
@@ -584,43 +450,30 @@ ISR(INT0_vect)
  2f0:	df 93       	push	r29
  2f2:	ef 93       	push	r30
  2f4:	ff 93       	push	r31
-	cli();
  2f6:	f8 94       	cli
-	can_message* msg = (can_message *) malloc(1*sizeof(can_message));
  2f8:	8a e0       	ldi	r24, 0x0A	; 10
  2fa:	90 e0       	ldi	r25, 0x00	; 0
  2fc:	f1 d0       	rcall	.+482    	; 0x4e0 <malloc>
  2fe:	ec 01       	movw	r28, r24
-	//CHECK WHICH BUFFER RECIEVED MESSAGE
-	printf("message INTERRUPTION recieved\n\r");
  300:	8c e7       	ldi	r24, 0x7C	; 124
  302:	92 e0       	ldi	r25, 0x02	; 2
  304:	9f 93       	push	r25
  306:	8f 93       	push	r24
  308:	5c d2       	rcall	.+1208   	; 0x7c2 <printf>
-	uint8_t canInt = can_controller_read(MCP_CANINTF);
  30a:	8c e2       	ldi	r24, 0x2C	; 44
  30c:	16 df       	rcall	.-468    	; 0x13a <can_controller_read>
-	if ((canInt & MCP_RX0IF) == MCP_RX0IF)
  30e:	0f 90       	pop	r0
  310:	0f 90       	pop	r0
  312:	80 ff       	sbrs	r24, 0
  314:	1c c0       	rjmp	.+56     	; 0x34e <__vector_1+0x88>
-	{
-		
-		can_recieve_msg(0, msg);
  316:	be 01       	movw	r22, r28
  318:	80 e0       	ldi	r24, 0x00	; 0
  31a:	af df       	rcall	.-162    	; 0x27a <can_recieve_msg>
-		
-		//printf("DATA ON RX0\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
  31c:	89 81       	ldd	r24, Y+1	; 0x01
  31e:	88 23       	and	r24, r24
  320:	09 f4       	brne	.+2      	; 0x324 <__vector_1+0x5e>
  322:	44 c0       	rjmp	.+136    	; 0x3ac <__vector_1+0xe6>
  324:	f1 2c       	mov	r15, r1
-			printf("%d \n\r", msg->data[byte]);
  326:	0c e9       	ldi	r16, 0x9C	; 156
  328:	12 e0       	ldi	r17, 0x02	; 2
  32a:	fe 01       	movw	r30, r28
@@ -632,12 +485,6 @@ ISR(INT0_vect)
  336:	1f 93       	push	r17
  338:	0f 93       	push	r16
  33a:	43 d2       	rcall	.+1158   	; 0x7c2 <printf>
-	{
-		
-		can_recieve_msg(0, msg);
-		
-		//printf("DATA ON RX0\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
  33c:	f3 94       	inc	r15
  33e:	0f 90       	pop	r0
  340:	0f 90       	pop	r0
@@ -647,37 +494,26 @@ ISR(INT0_vect)
  348:	f8 16       	cp	r15, r24
  34a:	78 f3       	brcs	.-34     	; 0x32a <__vector_1+0x64>
  34c:	2f c0       	rjmp	.+94     	; 0x3ac <__vector_1+0xe6>
-			printf("%d \n\r", msg->data[byte]);
-		}
-		
-	}else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
  34e:	81 ff       	sbrs	r24, 1
  350:	26 c0       	rjmp	.+76     	; 0x39e <__vector_1+0xd8>
-	{
-		can_controller_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
  352:	40 e0       	ldi	r20, 0x00	; 0
  354:	62 e0       	ldi	r22, 0x02	; 2
  356:	8c e2       	ldi	r24, 0x2C	; 44
  358:	02 df       	rcall	.-508    	; 0x15e <can_controller_bit_modify>
-		can_recieve_msg(1, msg);
  35a:	be 01       	movw	r22, r28
  35c:	81 e0       	ldi	r24, 0x01	; 1
  35e:	8d df       	rcall	.-230    	; 0x27a <can_recieve_msg>
-		
-		printf("DATA ON RX1\n\r");
  360:	82 ea       	ldi	r24, 0xA2	; 162
  362:	92 e0       	ldi	r25, 0x02	; 2
  364:	9f 93       	push	r25
  366:	8f 93       	push	r24
  368:	2c d2       	rcall	.+1112   	; 0x7c2 <printf>
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
  36a:	0f 90       	pop	r0
  36c:	0f 90       	pop	r0
  36e:	89 81       	ldd	r24, Y+1	; 0x01
  370:	88 23       	and	r24, r24
  372:	e1 f0       	breq	.+56     	; 0x3ac <__vector_1+0xe6>
  374:	f1 2c       	mov	r15, r1
-			printf("%d \n\r", msg->data[byte]);
  376:	0c e9       	ldi	r16, 0x9C	; 156
  378:	12 e0       	ldi	r17, 0x02	; 2
  37a:	fe 01       	movw	r30, r28
@@ -689,12 +525,6 @@ ISR(INT0_vect)
  386:	1f 93       	push	r17
  388:	0f 93       	push	r16
  38a:	1b d2       	rcall	.+1078   	; 0x7c2 <printf>
-	{
-		can_controller_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
-		can_recieve_msg(1, msg);
-		
-		printf("DATA ON RX1\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
  38c:	f3 94       	inc	r15
  38e:	0f 90       	pop	r0
  390:	0f 90       	pop	r0
@@ -704,11 +534,6 @@ ISR(INT0_vect)
  398:	f8 16       	cp	r15, r24
  39a:	78 f3       	brcs	.-34     	; 0x37a <__vector_1+0xb4>
  39c:	07 c0       	rjmp	.+14     	; 0x3ac <__vector_1+0xe6>
-			printf("%d \n\r", msg->data[byte]);
-		}
-	}else
-	{
-		printf("No message available on the CAN REX BUFFERs\n\r");
  39e:	80 eb       	ldi	r24, 0xB0	; 176
  3a0:	92 e0       	ldi	r25, 0x02	; 2
  3a2:	9f 93       	push	r25
@@ -716,22 +541,16 @@ ISR(INT0_vect)
  3a6:	0d d2       	rcall	.+1050   	; 0x7c2 <printf>
  3a8:	0f 90       	pop	r0
  3aa:	0f 90       	pop	r0
-		
-	}
-	printf("===========================================\n\r");
  3ac:	8e ed       	ldi	r24, 0xDE	; 222
  3ae:	92 e0       	ldi	r25, 0x02	; 2
  3b0:	9f 93       	push	r25
  3b2:	8f 93       	push	r24
  3b4:	06 d2       	rcall	.+1036   	; 0x7c2 <printf>
-	free(msg);
  3b6:	ce 01       	movw	r24, r28
  3b8:	2b d1       	rcall	.+598    	; 0x610 <free>
-	sei();
  3ba:	78 94       	sei
  3bc:	0f 90       	pop	r0
  3be:	0f 90       	pop	r0
-}
  3c0:	ff 91       	pop	r31
  3c2:	ef 91       	pop	r30
  3c4:	df 91       	pop	r29
@@ -758,87 +577,54 @@ ISR(INT0_vect)
  3ee:	18 95       	reti
 
 000003f0 <can_driver_test>:
-	}
-	can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
-}
-
-void can_driver_test()
-{
  3f0:	0f 93       	push	r16
  3f2:	1f 93       	push	r17
  3f4:	cf 93       	push	r28
  3f6:	df 93       	push	r29
-	can_message* msg = (can_message *) malloc(1*sizeof(can_message));
  3f8:	8a e0       	ldi	r24, 0x0A	; 10
  3fa:	90 e0       	ldi	r25, 0x00	; 0
  3fc:	71 d0       	rcall	.+226    	; 0x4e0 <malloc>
  3fe:	ec 01       	movw	r28, r24
-	msg->id = 2;
  400:	82 e0       	ldi	r24, 0x02	; 2
  402:	88 83       	st	Y, r24
-	msg->data[0] = 1;
  404:	91 e0       	ldi	r25, 0x01	; 1
  406:	9a 83       	std	Y+2, r25	; 0x02
-	msg->data[1] = 2;
  408:	8b 83       	std	Y+3, r24	; 0x03
-	msg->data[2] = 3;
  40a:	03 e0       	ldi	r16, 0x03	; 3
  40c:	0c 83       	std	Y+4, r16	; 0x04
-	msg->data[3] = 4;
  40e:	14 e0       	ldi	r17, 0x04	; 4
  410:	1d 83       	std	Y+5, r17	; 0x05
-	msg->data[4] = 5;
  412:	85 e0       	ldi	r24, 0x05	; 5
  414:	8e 83       	std	Y+6, r24	; 0x06
-	msg->data[5] = 6;
  416:	86 e0       	ldi	r24, 0x06	; 6
  418:	8f 83       	std	Y+7, r24	; 0x07
-	msg->data[6] = 7;
  41a:	87 e0       	ldi	r24, 0x07	; 7
  41c:	88 87       	std	Y+8, r24	; 0x08
-	msg->data[7] = 8;
  41e:	88 e0       	ldi	r24, 0x08	; 8
  420:	89 87       	std	Y+9, r24	; 0x09
-	msg->length = 8;
  422:	89 83       	std	Y+1, r24	; 0x01
-	can_send_msg(msg);
  424:	ce 01       	movw	r24, r28
  426:	03 df       	rcall	.-506    	; 0x22e <can_send_msg>
-	free(msg);
  428:	ce 01       	movw	r24, r28
  42a:	f2 d0       	rcall	.+484    	; 0x610 <free>
-	
-	msg = (can_message *) malloc(1*sizeof(can_message));
  42c:	8a e0       	ldi	r24, 0x0A	; 10
  42e:	90 e0       	ldi	r25, 0x00	; 0
  430:	57 d0       	rcall	.+174    	; 0x4e0 <malloc>
  432:	ec 01       	movw	r28, r24
-	msg->id = 3;
  434:	08 83       	st	Y, r16
-	msg->data[0] = 12;
  436:	8c e0       	ldi	r24, 0x0C	; 12
  438:	8a 83       	std	Y+2, r24	; 0x02
-	msg->data[1] = 13;
  43a:	8d e0       	ldi	r24, 0x0D	; 13
  43c:	8b 83       	std	Y+3, r24	; 0x03
-	msg->data[2] = 14;
  43e:	8e e0       	ldi	r24, 0x0E	; 14
  440:	8c 83       	std	Y+4, r24	; 0x04
-	msg->data[3] = 15;
  442:	8f e0       	ldi	r24, 0x0F	; 15
  444:	8d 83       	std	Y+5, r24	; 0x05
-	msg->length = 4;
  446:	19 83       	std	Y+1, r17	; 0x01
-	can_send_msg(msg);
  448:	ce 01       	movw	r24, r28
  44a:	f1 de       	rcall	.-542    	; 0x22e <can_send_msg>
-	free(msg);
  44c:	ce 01       	movw	r24, r28
  44e:	e0 d0       	rcall	.+448    	; 0x610 <free>
-	
-	
-
-}
  450:	df 91       	pop	r29
  452:	cf 91       	pop	r28
  454:	1f 91       	pop	r17
@@ -846,30 +632,17 @@ void can_driver_test()
  458:	08 95       	ret
 
 0000045a <main>:
-#include "can_controller_driver.h"
-#include "can_driver.h"
-
-int main(void)
-{
-	USART_Init(MYUBRR);
  45a:	87 e6       	ldi	r24, 0x67	; 103
  45c:	90 e0       	ldi	r25, 0x00	; 0
  45e:	30 d0       	rcall	.+96     	; 0x4c0 <USART_Init>
-	spi_init();
  460:	17 d0       	rcall	.+46     	; 0x490 <spi_init>
-	can_controller_init();
  462:	a8 de       	rcall	.-688    	; 0x1b4 <can_controller_init>
-	can_init();
  464:	c8 de       	rcall	.-624    	; 0x1f6 <can_init>
-	
-	printf("Hello from node 2!\n\r");
  466:	8c e0       	ldi	r24, 0x0C	; 12
  468:	93 e0       	ldi	r25, 0x03	; 3
  46a:	9f 93       	push	r25
  46c:	8f 93       	push	r24
  46e:	a9 d1       	rcall	.+850    	; 0x7c2 <printf>
-
-	can_driver_test();
  470:	bf df       	rcall	.-130    	; 0x3f0 <can_driver_test>
  472:	0f 90       	pop	r0
  474:	0f 90       	pop	r0

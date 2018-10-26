@@ -41,6 +41,7 @@ C_SRCS +=  \
 ../can_driver.c \
 ../main.c \
 ../spi_driver.c \
+../timer_driver.c \
 ../usart_driver.c
 
 
@@ -55,6 +56,7 @@ can_controller_driver.o \
 can_driver.o \
 main.o \
 spi_driver.o \
+timer_driver.o \
 usart_driver.o
 
 OBJS_AS_ARGS +=  \
@@ -62,6 +64,7 @@ can_controller_driver.o \
 can_driver.o \
 main.o \
 spi_driver.o \
+timer_driver.o \
 usart_driver.o
 
 C_DEPS +=  \
@@ -69,6 +72,7 @@ can_controller_driver.d \
 can_driver.d \
 main.d \
 spi_driver.d \
+timer_driver.d \
 usart_driver.d
 
 C_DEPS_AS_ARGS +=  \
@@ -76,6 +80,7 @@ can_controller_driver.d \
 can_driver.d \
 main.d \
 spi_driver.d \
+timer_driver.d \
 usart_driver.d
 
 OUTPUT_FILE_PATH +=byggern24_node2.elf
@@ -92,6 +97,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 
