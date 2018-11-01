@@ -37,8 +37,10 @@ SUBDIRS :=
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
+../adc_driver.c \
 ../can_controller_driver.c \
 ../can_driver.c \
+../game.c \
 ../main.c \
 ../spi_driver.c \
 ../timer_driver.c \
@@ -52,32 +54,40 @@ ASM_SRCS +=
 
 
 OBJS +=  \
+adc_driver.o \
 can_controller_driver.o \
 can_driver.o \
+game.o \
 main.o \
 spi_driver.o \
 timer_driver.o \
 usart_driver.o
 
 OBJS_AS_ARGS +=  \
+adc_driver.o \
 can_controller_driver.o \
 can_driver.o \
+game.o \
 main.o \
 spi_driver.o \
 timer_driver.o \
 usart_driver.o
 
 C_DEPS +=  \
+adc_driver.d \
 can_controller_driver.d \
 can_driver.d \
+game.d \
 main.d \
 spi_driver.d \
 timer_driver.d \
 usart_driver.d
 
 C_DEPS_AS_ARGS +=  \
+adc_driver.d \
 can_controller_driver.d \
 can_driver.d \
+game.d \
 main.d \
 spi_driver.d \
 timer_driver.d \
@@ -97,6 +107,10 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
 
 
 

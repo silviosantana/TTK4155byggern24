@@ -25,10 +25,10 @@ ISR(INT0_vect)
 		
 		//printf("X:\tY:\tLeft:\tRight:\tDirection:\n\r");
 		for (uint8_t byte = 0; byte < msg->length; byte++) {
-			printf("%d \t", (int8_t) msg->data[byte]);
+			//printf("%d \t", (int8_t) msg->data[byte]);
 		}
 		timer_driver_set_duty_cycle(msg->data[0]);
-		printf("\n\r");
+		//printf("\n\r");
 		
 	}
 // 	else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
