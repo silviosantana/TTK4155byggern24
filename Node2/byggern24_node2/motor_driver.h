@@ -5,6 +5,9 @@
  *  Author: silviohc
  */ 
 
+#include <avr/io.h>
+
+#include "util.h"
 
 #ifndef MOTOR_DRIVER_H_
 #define MOTOR_DRIVER_H_
@@ -18,6 +21,6 @@
 
 void motor_init();
 uint16_t motor_get_encoder();
-void motor_move(Position pos);
+void motor_move(int dir, uint8_t speed);
 
 #endif /* MOTOR_DRIVER_H_ */

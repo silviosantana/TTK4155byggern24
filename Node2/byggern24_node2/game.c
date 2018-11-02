@@ -17,6 +17,7 @@ uint16_t record_score(uint16_t score)
 		score_interval = 1;
 		_delay_ms(1000);
 	}
+	
 		
 	while(score_interval == 1)
 	{

@@ -40,10 +40,13 @@ C_SRCS +=  \
 ../adc_driver.c \
 ../can_controller_driver.c \
 ../can_driver.c \
+../dac_driver.c \
 ../game.c \
 ../main.c \
+../motor_driver.c \
 ../spi_driver.c \
 ../timer_driver.c \
+../TWI_Master.c \
 ../usart_driver.c
 
 
@@ -57,40 +60,52 @@ OBJS +=  \
 adc_driver.o \
 can_controller_driver.o \
 can_driver.o \
+dac_driver.o \
 game.o \
 main.o \
+motor_driver.o \
 spi_driver.o \
 timer_driver.o \
+TWI_Master.o \
 usart_driver.o
 
 OBJS_AS_ARGS +=  \
 adc_driver.o \
 can_controller_driver.o \
 can_driver.o \
+dac_driver.o \
 game.o \
 main.o \
+motor_driver.o \
 spi_driver.o \
 timer_driver.o \
+TWI_Master.o \
 usart_driver.o
 
 C_DEPS +=  \
 adc_driver.d \
 can_controller_driver.d \
 can_driver.d \
+dac_driver.d \
 game.d \
 main.d \
+motor_driver.d \
 spi_driver.d \
 timer_driver.d \
+TWI_Master.d \
 usart_driver.d
 
 C_DEPS_AS_ARGS +=  \
 adc_driver.d \
 can_controller_driver.d \
 can_driver.d \
+dac_driver.d \
 game.d \
 main.d \
+motor_driver.d \
 spi_driver.d \
 timer_driver.d \
+TWI_Master.d \
 usart_driver.d
 
 OUTPUT_FILE_PATH +=byggern24_node2.elf
@@ -107,6 +122,12 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
+
+
 
 
 

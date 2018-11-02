@@ -1,4 +1,6 @@
+#include "motor_driver.h"
 
+#include <avr/io.h>
 
 #include "util.h"
 
@@ -23,7 +25,7 @@ void motor_init()
 	
 }
 
-void motor_move(direction dir, uint8_t speed)
+void motor_move(int dir, uint8_t speed)
 {
 	set_bit(PORTH, MJ1_EN);
 	
