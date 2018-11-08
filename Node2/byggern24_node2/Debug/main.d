@@ -20,7 +20,8 @@ main.d main.o: .././main.c \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\lib\gcc\avr\4.8.1\include\stdarg.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\lib\gcc\avr\4.8.1\include\stddef.h \
  .././can_controller_driver.h .././can_driver.h .././timer_driver.h \
- .././adc_driver.h .././game.h .././dac_driver.h .././TWI_Master.h
+ .././adc_driver.h .././game.h .././dac_driver.h .././TWI_Master.h \
+ .././motor_driver.h .././motor_controller.h
 
 c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -77,3 +78,7 @@ c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-g
 .././dac_driver.h:
 
 .././TWI_Master.h:
+
+.././motor_driver.h:
+
+.././motor_controller.h:

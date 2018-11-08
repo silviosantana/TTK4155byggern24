@@ -20,6 +20,7 @@ void can_controller_reset()
 uint8_t can_controller_init()
 {
     uint8_t value;
+	
 
     //spi_init(); // Initialize SPI
     can_controller_reset(); // Send reset-command

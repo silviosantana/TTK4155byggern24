@@ -14,6 +14,8 @@ game.c
 
 main.c
 
+motor_controller.c
+
 motor_driver.c
 
 spi_driver.c

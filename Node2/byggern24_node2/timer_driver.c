@@ -31,7 +31,8 @@ void timer_driver_init()
 
 void timer_driver_set_duty_cycle(int8_t position)
 {
-	int duty_cycle = 10 * position + 2999;
+	int duty_cycle = 20 * (100 - position) + 1999;
+	//printf("%d\n\r", duty_cycle);
 	
 	if (duty_cycle < 1999)
 		duty_cycle = 1999;

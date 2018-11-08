@@ -1,5 +1,6 @@
 #include "joystick.h"
 
+#include "avr/io.h"
 #include "util.h"
 #include "adc_driver.h"
 
@@ -65,3 +66,9 @@ int get_right_slider()
 	return (int) (range/2.55);
 }
 
+int get_joystick_push()
+{
+	uint8_t push = (PINB & 0b00000001);
+	
+	return push;
+}

@@ -166,6 +166,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="motor_controller.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="motor_controller.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="motor_driver.c">
       <SubType>compile</SubType>
     </Compile>

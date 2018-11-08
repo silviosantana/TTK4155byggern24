@@ -9,9 +9,11 @@
 #include "can_controller_driver.h"
 #include "usart_driver.h"
 #include "timer_driver.h"
+#include "motor_driver.h"
+#include "motor_controller.h"
 
 
-ISR(INT0_vect)
+ISR(INT4_vect)
 {
 	cli();
 	can_message* msg = (can_message *) malloc(1*sizeof(can_message));
@@ -23,11 +25,21 @@ ISR(INT0_vect)
 	{
 		can_recieve_msg(0, msg);
 		
-		//printf("X:\tY:\tLeft:\tRight:\tDirection:\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
+		//printf("X:\tY:\tLeft:\tRight:\tDir:\tpush:\n\r");
+		//for (uint8_t byte = 0; byte < msg->length; byte++) {
 			//printf("%d \t", (int8_t) msg->data[byte]);
-		}
-		timer_driver_set_duty_cycle(msg->data[0]);
+		//}
+		
+		// Control servo
+		timer_driver_set_duty_cycle(msg->data[3]);
+		
+		// Control solenoid
+		control_solenoid(msg->data[5]);
+		
+		// Control Motor
+		//control_motor(msg->data[4], msg->data[0]);
+		motor_controller_set_point(msg->data[2]);
+		
 		//printf("\n\r");
 		
 	}
@@ -59,7 +71,7 @@ ISR(INT0_vect)
 	sei();
 }
 
-// ISR(INT0_vect)
+// ISR(INT4_vect)
 // {
 // 	msg_flag = 1;
 // 	printf("FLAG SET: %d\n\r", msg_flag);
@@ -78,15 +90,18 @@ void can_init ()
 	//can_controller_bit_modify(MCP_CANINTE, MCP_RX_INT, MCP_RX_INT);
 	//can_controller_write(MCP_CANINTE, MCP_RX_INT);
 	
+	//Set PL0 as output for solenoid
+	set_bit(DDRL, PL0);
+	
 	// SET UP INTERRUPTION TO RECIEVE MESSAGE
 	//DDRD &= ~(1<<PD0);
-	cli();
-	clear_bit(EICRA, ISC00);
-	set_bit(EICRA, ISC01); //interrupt on the falling edge
-	set_bit(EIMSK, INT0); //enable external interrupt INT0
+	//cli();
+	clear_bit(EICRB, ISC40);
+	set_bit(EICRB, ISC41); //interrupt on the falling edge
+	set_bit(EIMSK, INT4); //enable external interrupt INT4
 	can_controller_write(MCP_CANINTF, 0x00);
 	can_controller_write(MCP_EFLG, 0x00);
-	sei();									//enable Global Interrupt
+	//sei();									//enable Global Interrupt
 }
 
 uint8_t can_send_msg(can_message* msg)

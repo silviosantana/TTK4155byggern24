@@ -21,6 +21,7 @@
 
 void motor_init();
 uint16_t motor_get_encoder();
-void motor_move(int dir, uint8_t speed);
+void motor_move(int dir, int8_t speed);
+void control_solenoid(uint8_t push);
 
 #endif /* MOTOR_DRIVER_H_ */

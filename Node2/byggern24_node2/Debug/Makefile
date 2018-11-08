@@ -43,6 +43,7 @@ C_SRCS +=  \
 ../dac_driver.c \
 ../game.c \
 ../main.c \
+../motor_controller.c \
 ../motor_driver.c \
 ../spi_driver.c \
 ../timer_driver.c \
@@ -63,6 +64,7 @@ can_driver.o \
 dac_driver.o \
 game.o \
 main.o \
+motor_controller.o \
 motor_driver.o \
 spi_driver.o \
 timer_driver.o \
@@ -76,6 +78,7 @@ can_driver.o \
 dac_driver.o \
 game.o \
 main.o \
+motor_controller.o \
 motor_driver.o \
 spi_driver.o \
 timer_driver.o \
@@ -89,6 +92,7 @@ can_driver.d \
 dac_driver.d \
 game.d \
 main.d \
+motor_controller.d \
 motor_driver.d \
 spi_driver.d \
 timer_driver.d \
@@ -102,6 +106,7 @@ can_driver.d \
 dac_driver.d \
 game.d \
 main.d \
+motor_controller.d \
 motor_driver.d \
 spi_driver.d \
 timer_driver.d \
@@ -122,6 +127,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 
