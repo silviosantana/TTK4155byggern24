@@ -118,17 +118,9 @@ Disassembly of section .text:
       c2:	08 95       	ret
 
 000000c4 <can_controller_reset>:
-
-#define CAN_CS PB4
-
-void can_controller_reset()
-{
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
       c4:	c4 98       	cbi	0x18, 4	; 24
-	spi_send(MCP_RESET);
       c6:	80 ec       	ldi	r24, 0xC0	; 192
       c8:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
       cc:	c4 9a       	sbi	0x18, 4	; 24
 	#else
 		//round up by default
@@ -145,162 +137,84 @@ void can_controller_reset()
       da:	08 95       	ret
 
 000000dc <can_controller_read>:
-	can_controller_write(MCP_TXB0SIDL, 0x00);	
-    return 0;
-}
-
-uint8_t can_controller_read(uint8_t address)
-{
       dc:	cf 93       	push	r28
       de:	c8 2f       	mov	r28, r24
-	uint8_t result;
-
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
       e0:	c4 98       	cbi	0x18, 4	; 24
-
-	spi_send(MCP_READ); // Send read instruction
       e2:	83 e0       	ldi	r24, 0x03	; 3
       e4:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-	spi_send(address); // Send address
       e8:	8c 2f       	mov	r24, r28
       ea:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-	result = spi_read(); // Read result
       ee:	0e 94 d3 03 	call	0x7a6	; 0x7a6 <spi_read>
-
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
       f2:	c4 9a       	sbi	0x18, 4	; 24
-
-	return result;
-}
       f4:	cf 91       	pop	r28
       f6:	08 95       	ret
 
 000000f8 <can_controller_request_to_send>:
-	return (modestat & MODE_MASK);
-}
-
-void can_controller_request_to_send()
-{
-		PORTB &= ~(1<<CAN_CS);
       f8:	c4 98       	cbi	0x18, 4	; 24
-		
-		// The buffer types are MCP_RTS_TX0, MCP_RTS_TX1, MCP_RTS_TX2 and MCP_RTS_ALL
-		spi_send(MCP_RTS_TX0);
       fa:	81 e8       	ldi	r24, 0x81	; 129
       fc:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-
-		PORTB |= ~(1<<CAN_CS);
      100:	88 b3       	in	r24, 0x18	; 24
      102:	8f 6e       	ori	r24, 0xEF	; 239
      104:	88 bb       	out	0x18, r24	; 24
      106:	08 95       	ret
 
 00000108 <can_controller_bit_modify>:
-}
-
-void can_controller_bit_modify(uint8_t address, uint8_t mask, uint8_t data)
-{
      108:	1f 93       	push	r17
      10a:	cf 93       	push	r28
      10c:	df 93       	push	r29
      10e:	18 2f       	mov	r17, r24
      110:	d6 2f       	mov	r29, r22
      112:	c4 2f       	mov	r28, r20
-		PORTB &= ~(1<<CAN_CS); // Select CAN-controller
      114:	c4 98       	cbi	0x18, 4	; 24
-
-		spi_send(MCP_BITMOD); // Send read instruction
      116:	85 e0       	ldi	r24, 0x05	; 5
      118:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-		spi_send(address); // Send address
      11c:	81 2f       	mov	r24, r17
      11e:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-		spi_send(mask); // Send mask,
      122:	8d 2f       	mov	r24, r29
      124:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-		spi_send(data); // Send data
      128:	8c 2f       	mov	r24, r28
      12a:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-
-		PORTB |= (1<<CAN_CS); // Deselect CAN-controller
      12e:	c4 9a       	sbi	0x18, 4	; 24
-}
      130:	df 91       	pop	r29
      132:	cf 91       	pop	r28
      134:	1f 91       	pop	r17
      136:	08 95       	ret
 
 00000138 <can_controller_set_mode>:
-}
-
-uint8_t can_controller_set_mode(uint8_t mode)
-{
-	uint8_t modestat;
-	can_controller_bit_modify(MCP_CANCTRL, MODE_MASK, mode);
      138:	48 2f       	mov	r20, r24
      13a:	60 ee       	ldi	r22, 0xE0	; 224
      13c:	8f e0       	ldi	r24, 0x0F	; 15
      13e:	0e 94 84 00 	call	0x108	; 0x108 <can_controller_bit_modify>
-	modestat = can_controller_read(MCP_CANSTAT);
      142:	8e e0       	ldi	r24, 0x0E	; 14
      144:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
-	return (modestat & MODE_MASK);
-}
      148:	80 7e       	andi	r24, 0xE0	; 224
      14a:	08 95       	ret
 
 0000014c <can_controller_write>:
-
-	return status;
-}
-
-void can_controller_write(uint8_t address, uint8_t data)
-{
      14c:	cf 93       	push	r28
      14e:	df 93       	push	r29
      150:	d8 2f       	mov	r29, r24
      152:	c6 2f       	mov	r28, r22
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
      154:	c4 98       	cbi	0x18, 4	; 24
-	
-	spi_send(MCP_WRITE);
      156:	82 e0       	ldi	r24, 0x02	; 2
      158:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-	spi_send(address);
      15c:	8d 2f       	mov	r24, r29
      15e:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-	spi_send(data);
      162:	8c 2f       	mov	r24, r28
      164:	0e 94 d0 03 	call	0x7a0	; 0x7a0 <spi_send>
-
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
      168:	c4 9a       	sbi	0x18, 4	; 24
-}
      16a:	df 91       	pop	r29
      16c:	cf 91       	pop	r28
      16e:	08 95       	ret
 
 00000170 <can_controller_init>:
-uint8_t can_controller_init()
-{
-    uint8_t value;
-
-    //spi_init(); // Initialize SPI
-    can_controller_reset(); // Send reset-command
      170:	0e 94 62 00 	call	0xc4	; 0xc4 <can_controller_reset>
-	
-
-    // Self-test
-    value = can_controller_read(MCP_CANSTAT);
      174:	8e e0       	ldi	r24, 0x0E	; 14
      176:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
-    if ((value & MODE_MASK)  != MODE_CONFIG) 
      17a:	98 2f       	mov	r25, r24
      17c:	90 7e       	andi	r25, 0xE0	; 224
      17e:	90 38       	cpi	r25, 0x80	; 128
      180:	71 f0       	breq	.+28     	; 0x19e <can_controller_init+0x2e>
-    {
-        printf("%d can_controller is NOT in configuration mode after reset!\n\r", value);
      182:	1f 92       	push	r1
      184:	8f 93       	push	r24
      186:	86 e0       	ldi	r24, 0x06	; 6
@@ -308,61 +222,35 @@ uint8_t can_controller_init()
      18a:	9f 93       	push	r25
      18c:	8f 93       	push	r24
      18e:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-        return 1;
      192:	0f 90       	pop	r0
      194:	0f 90       	pop	r0
      196:	0f 90       	pop	r0
      198:	0f 90       	pop	r0
      19a:	81 e0       	ldi	r24, 0x01	; 1
      19c:	08 95       	ret
-    }
-	
-	//printf("mode value: %d\n\r", (value & MODE_MASK));
-	
-	//turn RXM1 and RXM0 to 11 to turn off filters and receive any messages
-	can_controller_bit_modify(MCP_CANINTE, 0b11111111, 0b00000011);
      19e:	43 e0       	ldi	r20, 0x03	; 3
      1a0:	6f ef       	ldi	r22, 0xFF	; 255
      1a2:	8b e2       	ldi	r24, 0x2B	; 43
      1a4:	0e 94 84 00 	call	0x108	; 0x108 <can_controller_bit_modify>
-	can_controller_bit_modify(MCP_RXB0CTRL, 0b01100100, 0b01100100);
      1a8:	44 e6       	ldi	r20, 0x64	; 100
      1aa:	64 e6       	ldi	r22, 0x64	; 100
      1ac:	80 e6       	ldi	r24, 0x60	; 96
      1ae:	0e 94 84 00 	call	0x108	; 0x108 <can_controller_bit_modify>
-	//printf("RBX0CTRL: %02x\n\r", can_controller_read(MCP_RXB0CTRL));
-	can_controller_bit_modify(MCP_RXB1CTRL, 0b01100000, 0b01100000);
      1b2:	40 e6       	ldi	r20, 0x60	; 96
      1b4:	60 e6       	ldi	r22, 0x60	; 96
      1b6:	80 e7       	ldi	r24, 0x70	; 112
      1b8:	0e 94 84 00 	call	0x108	; 0x108 <can_controller_bit_modify>
-	//printf("RBX1CTRL: %02x\n\r", can_controller_read(MCP_RXB1CTRL));
-
-    
-	//Set lower ID reg to zero
-	can_controller_write(MCP_TXB0SIDL, 0x00);	
      1bc:	60 e0       	ldi	r22, 0x00	; 0
      1be:	82 e3       	ldi	r24, 0x32	; 50
      1c0:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-    return 0;
      1c4:	80 e0       	ldi	r24, 0x00	; 0
-}
      1c6:	08 95       	ret
 
 000001c8 <can_init>:
-}
-
-void can_init ()
-{
-	//set loopback mode
-	uint8_t mode = can_controller_set_mode(MODE_NORMAL);
      1c8:	80 e0       	ldi	r24, 0x00	; 0
      1ca:	0e 94 9c 00 	call	0x138	; 0x138 <can_controller_set_mode>
-	if (mode != MODE_NORMAL)
      1ce:	88 23       	and	r24, r24
      1d0:	41 f0       	breq	.+16     	; 0x1e2 <can_init+0x1a>
-	{
-		printf("Could not set normal mode! I am sorry!\n\r");
      1d2:	83 e5       	ldi	r24, 0x53	; 83
      1d4:	91 e0       	ldi	r25, 0x01	; 1
      1d6:	9f 93       	push	r25
@@ -370,98 +258,54 @@ void can_init ()
      1da:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
      1de:	0f 90       	pop	r0
      1e0:	0f 90       	pop	r0
-	//can_controller_bit_modify(MCP_CANINTE, MCP_RX_INT, MCP_RX_INT);
-	//can_controller_write(MCP_CANINTE, MCP_RX_INT);
-	
-	// SET UP INTERRUPTION TO RECIEVE MESSAGE
-	//DDRD &= ~(1<<PD3);
-	cli();
      1e2:	f8 94       	cli
-	MCUCR |= (1 << ISC11);
      1e4:	85 b7       	in	r24, 0x35	; 53
      1e6:	88 60       	ori	r24, 0x08	; 8
      1e8:	85 bf       	out	0x35, r24	; 53
-	MCUCR &= ~(1 << ISC10);	//interrupt on the falling edge
      1ea:	85 b7       	in	r24, 0x35	; 53
      1ec:	8b 7f       	andi	r24, 0xFB	; 251
      1ee:	85 bf       	out	0x35, r24	; 53
-	can_controller_write(MCP_CANINTF, 0x00);
      1f0:	60 e0       	ldi	r22, 0x00	; 0
      1f2:	8c e2       	ldi	r24, 0x2C	; 44
      1f4:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-	can_controller_write(MCP_EFLG, 0x00);
      1f8:	60 e0       	ldi	r22, 0x00	; 0
      1fa:	8d e2       	ldi	r24, 0x2D	; 45
      1fc:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-	GICR |= (1 << INT1);						//enable external interrupt INT1
      200:	8b b7       	in	r24, 0x3b	; 59
      202:	80 68       	ori	r24, 0x80	; 128
      204:	8b bf       	out	0x3b, r24	; 59
-	sei();									//enable Global Interrupt
      206:	78 94       	sei
      208:	08 95       	ret
 
 0000020a <can_send_msg>:
-}
-
-uint8_t can_send_msg(can_message* msg)
-{
      20a:	0f 93       	push	r16
      20c:	1f 93       	push	r17
      20e:	cf 93       	push	r28
      210:	df 93       	push	r29
      212:	ec 01       	movw	r28, r24
-	//writhe higher id
-	can_controller_write(MCP_TXB0SIDH, msg->id);
      214:	68 81       	ld	r22, Y
      216:	81 e3       	ldi	r24, 0x31	; 49
      218:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-	
-	// Define data length of message
-	uint8_t data_length = msg->length;
      21c:	09 81       	ldd	r16, Y+1	; 0x01
-	can_controller_write(MCP_TXB0DLC, msg->length);
      21e:	60 2f       	mov	r22, r16
      220:	85 e3       	ldi	r24, 0x35	; 53
      222:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-	
-	// Write data bytes to transmit buffer
-	uint8_t* data_bytes = msg->data;
      226:	22 96       	adiw	r28, 0x02	; 2
-	for (uint8_t byte = 0; byte < data_length; byte++) {
      228:	00 23       	and	r16, r16
      22a:	49 f0       	breq	.+18     	; 0x23e <can_send_msg+0x34>
      22c:	0a 5c       	subi	r16, 0xCA	; 202
      22e:	16 e3       	ldi	r17, 0x36	; 54
-		can_controller_write(MCP_TXB0Dm + byte, data_bytes[byte]);
      230:	69 91       	ld	r22, Y+
      232:	81 2f       	mov	r24, r17
      234:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
      238:	1f 5f       	subi	r17, 0xFF	; 255
-	uint8_t data_length = msg->length;
-	can_controller_write(MCP_TXB0DLC, msg->length);
-	
-	// Write data bytes to transmit buffer
-	uint8_t* data_bytes = msg->data;
-	for (uint8_t byte = 0; byte < data_length; byte++) {
      23a:	10 13       	cpse	r17, r16
      23c:	f9 cf       	rjmp	.-14     	; 0x230 <can_send_msg+0x26>
-		can_controller_write(MCP_TXB0Dm + byte, data_bytes[byte]);
-	}
-
-	// Request to send message, send if successful
-	can_controller_request_to_send();
      23e:	0e 94 7c 00 	call	0xf8	; 0xf8 <can_controller_request_to_send>
      242:	80 e0       	ldi	r24, 0x00	; 0
      244:	90 ef       	ldi	r25, 0xF0	; 240
      246:	01 97       	sbiw	r24, 0x01	; 1
      248:	f1 f7       	brne	.-4      	; 0x246 <can_send_msg+0x3c>
-	// 	printf("MCP_CANINTE %02x\n\r", can_controller_read(MCP_CANINTE));
-	// 	printf("CANINTF %02x\n\r", can_controller_read(MCP_CANINTF));
-	// 	printf("EFLG %02x\n\r", can_controller_read(MCP_EFLG));
-	// 	printf("MCP_RXB0CTRL %02x\n\r", can_controller_read(MCP_RXB0CTRL));
-	
-}
      24a:	df 91       	pop	r29
      24c:	cf 91       	pop	r28
      24e:	1f 91       	pop	r17
@@ -469,64 +313,35 @@ uint8_t can_send_msg(can_message* msg)
      252:	08 95       	ret
 
 00000254 <can_recieve_msg>:
-
-// CALLED WHEN  AN INTERRUPTION OCCURS
-void can_recieve_msg(uint8_t buffer, can_message* msg)
-{
      254:	0f 93       	push	r16
      256:	1f 93       	push	r17
      258:	cf 93       	push	r28
      25a:	df 93       	push	r29
      25c:	eb 01       	movw	r28, r22
-
-	//READ RX BUFFER - save ID on RXBnSIDH to Message.id (2 TIMES)
-	uint8_t id_high = can_controller_read(MCP_RXB0SIDH + buffer*16);
      25e:	18 2f       	mov	r17, r24
      260:	12 95       	swap	r17
      262:	10 7f       	andi	r17, 0xF0	; 240
      264:	81 e6       	ldi	r24, 0x61	; 97
      266:	81 0f       	add	r24, r17
      268:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
-	uint8_t mask;
-
-
-	uint8_t data_length = can_controller_read(MCP_RXB0DLC + buffer*16);
      26c:	85 e6       	ldi	r24, 0x65	; 101
      26e:	81 0f       	add	r24, r17
      270:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
-	mask = 0x0F;
-	msg->length = (data_length & mask);
      274:	98 2f       	mov	r25, r24
      276:	9f 70       	andi	r25, 0x0F	; 15
      278:	99 83       	std	Y+1, r25	; 0x01
-
-	//READ RX BUFFER - save DATA RXBnDm to Message.data (8 TIMES)
-	for (uint8_t byte = 0; byte < data_length; byte++) {
      27a:	88 23       	and	r24, r24
      27c:	59 f0       	breq	.+22     	; 0x294 <can_recieve_msg+0x40>
      27e:	1a 59       	subi	r17, 0x9A	; 154
      280:	22 96       	adiw	r28, 0x02	; 2
      282:	08 2f       	mov	r16, r24
      284:	01 0f       	add	r16, r17
-		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
      286:	81 2f       	mov	r24, r17
      288:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
      28c:	89 93       	st	Y+, r24
      28e:	1f 5f       	subi	r17, 0xFF	; 255
-	uint8_t data_length = can_controller_read(MCP_RXB0DLC + buffer*16);
-	mask = 0x0F;
-	msg->length = (data_length & mask);
-
-	//READ RX BUFFER - save DATA RXBnDm to Message.data (8 TIMES)
-	for (uint8_t byte = 0; byte < data_length; byte++) {
      290:	10 13       	cpse	r17, r16
      292:	f9 cf       	rjmp	.-14     	; 0x286 <can_recieve_msg+0x32>
-		msg->data[byte] = can_controller_read(MCP_RXB0Dm + buffer*16 + byte);
-	}
-	//can_controller_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
-	// 	can_controller_write(MCP_CANINTF, 0x00);
-	// 	can_controller_write(MCP_EFLG, 0x00);
-}
      294:	df 91       	pop	r29
      296:	cf 91       	pop	r28
      298:	1f 91       	pop	r17
@@ -534,12 +349,6 @@ void can_recieve_msg(uint8_t buffer, can_message* msg)
      29c:	08 95       	ret
 
 0000029e <__vector_2>:
-#include "util.h"
-#include "can_controller_driver.h"
-
-
-ISR(INT1_vect)
-{
      29e:	1f 92       	push	r1
      2a0:	0f 92       	push	r0
      2a2:	0f b6       	in	r0, 0x3f	; 63
@@ -562,35 +371,23 @@ ISR(INT1_vect)
      2c4:	df 93       	push	r29
      2c6:	ef 93       	push	r30
      2c8:	ff 93       	push	r31
-	cli();
      2ca:	f8 94       	cli
-	can_message* msg = (can_message *) malloc(1*sizeof(can_message));
      2cc:	8a e0       	ldi	r24, 0x0A	; 10
      2ce:	90 e0       	ldi	r25, 0x00	; 0
      2d0:	0e 94 80 05 	call	0xb00	; 0xb00 <malloc>
      2d4:	ec 01       	movw	r28, r24
-	//CHECK WHICH BUFFER RECIEVED MESSAGE
-	//printf("message INTERRUPTION recieved\n\r");
-	//print(my_buf);
-	uint8_t canInt = can_controller_read(MCP_CANINTF);
      2d6:	8c e2       	ldi	r24, 0x2C	; 44
      2d8:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
-	if ((canInt & MCP_RX0IF) == MCP_RX0IF)
      2dc:	80 ff       	sbrs	r24, 0
      2de:	26 c0       	rjmp	.+76     	; 0x32c <__vector_2+0x8e>
-	{
-		can_recieve_msg(0, msg);
      2e0:	be 01       	movw	r22, r28
      2e2:	80 e0       	ldi	r24, 0x00	; 0
      2e4:	0e 94 2a 01 	call	0x254	; 0x254 <can_recieve_msg>
-		
-		printf("DATA ON RX0:\n\r");
      2e8:	8c e7       	ldi	r24, 0x7C	; 124
      2ea:	91 e0       	ldi	r25, 0x01	; 1
      2ec:	9f 93       	push	r25
      2ee:	8f 93       	push	r24
      2f0:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
      2f4:	0f 90       	pop	r0
      2f6:	0f 90       	pop	r0
      2f8:	89 81       	ldd	r24, Y+1	; 0x01
@@ -598,7 +395,6 @@ ISR(INT1_vect)
      2fc:	09 f4       	brne	.+2      	; 0x300 <__vector_2+0x62>
      2fe:	4a c0       	rjmp	.+148    	; 0x394 <__vector_2+0xf6>
      300:	f1 2c       	mov	r15, r1
-			printf("%d \n\r", msg->data[byte]);
      302:	0b e8       	ldi	r16, 0x8B	; 139
      304:	11 e0       	ldi	r17, 0x01	; 1
      306:	fe 01       	movw	r30, r28
@@ -610,12 +406,6 @@ ISR(INT1_vect)
      312:	1f 93       	push	r17
      314:	0f 93       	push	r16
      316:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-	if ((canInt & MCP_RX0IF) == MCP_RX0IF)
-	{
-		can_recieve_msg(0, msg);
-		
-		printf("DATA ON RX0:\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
      31a:	f3 94       	inc	r15
      31c:	0f 90       	pop	r0
      31e:	0f 90       	pop	r0
@@ -625,32 +415,22 @@ ISR(INT1_vect)
      326:	f8 16       	cp	r15, r24
      328:	70 f3       	brcs	.-36     	; 0x306 <__vector_2+0x68>
      32a:	34 c0       	rjmp	.+104    	; 0x394 <__vector_2+0xf6>
-			printf("%d \n\r", msg->data[byte]);
-		}
-		
-	}else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
      32c:	81 ff       	sbrs	r24, 1
      32e:	25 c0       	rjmp	.+74     	; 0x37a <__vector_2+0xdc>
-	{
-		can_recieve_msg(1, msg);
      330:	be 01       	movw	r22, r28
      332:	81 e0       	ldi	r24, 0x01	; 1
      334:	0e 94 2a 01 	call	0x254	; 0x254 <can_recieve_msg>
-
-		printf("DATA ON RX1\n\r");
      338:	81 e9       	ldi	r24, 0x91	; 145
      33a:	91 e0       	ldi	r25, 0x01	; 1
      33c:	9f 93       	push	r25
      33e:	8f 93       	push	r24
      340:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
      344:	0f 90       	pop	r0
      346:	0f 90       	pop	r0
      348:	89 81       	ldd	r24, Y+1	; 0x01
      34a:	88 23       	and	r24, r24
      34c:	19 f1       	breq	.+70     	; 0x394 <__vector_2+0xf6>
      34e:	f1 2c       	mov	r15, r1
-			printf("%d \n\r", msg->data[byte]);
      350:	0b e8       	ldi	r16, 0x8B	; 139
      352:	11 e0       	ldi	r17, 0x01	; 1
      354:	fe 01       	movw	r30, r28
@@ -662,12 +442,6 @@ ISR(INT1_vect)
      360:	1f 93       	push	r17
      362:	0f 93       	push	r16
      364:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-	}else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
-	{
-		can_recieve_msg(1, msg);
-
-		printf("DATA ON RX1\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
      368:	f3 94       	inc	r15
      36a:	0f 90       	pop	r0
      36c:	0f 90       	pop	r0
@@ -677,29 +451,16 @@ ISR(INT1_vect)
      374:	f8 16       	cp	r15, r24
      376:	70 f3       	brcs	.-36     	; 0x354 <__vector_2+0xb6>
      378:	0d c0       	rjmp	.+26     	; 0x394 <__vector_2+0xf6>
-			printf("%d \n\r", msg->data[byte]);
-		}
-	}
-	else
-	{
-		can_controller_write(MCP_CANINTF, 0x00);
      37a:	60 e0       	ldi	r22, 0x00	; 0
      37c:	8c e2       	ldi	r24, 0x2C	; 44
      37e:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-		//can_controller_write(MCP_EFLG, 0x00);
-		free(msg);
      382:	ce 01       	movw	r24, r28
      384:	0e 94 18 06 	call	0xc30	; 0xc30 <free>
-		can_controller_write(MCP_CANINTF, 0x00);
      388:	60 e0       	ldi	r22, 0x00	; 0
      38a:	8c e2       	ldi	r24, 0x2C	; 44
      38c:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-		sei();
      390:	78 94       	sei
-		return;
      392:	3c c0       	rjmp	.+120    	; 0x40c <__vector_2+0x16e>
-	}
-	printf("before:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
      394:	8c e2       	ldi	r24, 0x2C	; 44
      396:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
      39a:	18 2f       	mov	r17, r24
@@ -714,12 +475,9 @@ ISR(INT1_vect)
      3ae:	9f 93       	push	r25
      3b0:	8f 93       	push	r24
      3b2:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-	can_controller_write(MCP_CANINTF, 0x00);
      3b6:	60 e0       	ldi	r22, 0x00	; 0
      3b8:	8c e2       	ldi	r24, 0x2C	; 44
      3ba:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-	//can_controller_write(MCP_EFLG, 0x00);
-	printf("aftah:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
      3be:	8c e2       	ldi	r24, 0x2C	; 44
      3c0:	0e 94 6e 00 	call	0xdc	; 0xdc <can_controller_read>
      3c4:	18 2f       	mov	r17, r24
@@ -734,20 +492,16 @@ ISR(INT1_vect)
      3d8:	9f 93       	push	r25
      3da:	8f 93       	push	r24
      3dc:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-	printf("===========================================\n\r");
      3e0:	8c ef       	ldi	r24, 0xFC	; 252
      3e2:	91 e0       	ldi	r25, 0x01	; 1
      3e4:	9f 93       	push	r25
      3e6:	8f 93       	push	r24
      3e8:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-	free(msg);
      3ec:	ce 01       	movw	r24, r28
      3ee:	0e 94 18 06 	call	0xc30	; 0xc30 <free>
-	can_controller_write(MCP_CANINTF, 0x00);
      3f2:	60 e0       	ldi	r22, 0x00	; 0
      3f4:	8c e2       	ldi	r24, 0x2C	; 44
      3f6:	0e 94 a6 00 	call	0x14c	; 0x14c <can_controller_write>
-	sei();
      3fa:	78 94       	sei
      3fc:	8d b7       	in	r24, 0x3d	; 61
      3fe:	9e b7       	in	r25, 0x3e	; 62
@@ -757,7 +511,6 @@ ISR(INT1_vect)
      406:	9e bf       	out	0x3e, r25	; 62
      408:	0f be       	out	0x3f, r0	; 63
      40a:	8d bf       	out	0x3d, r24	; 61
-}
      40c:	ff 91       	pop	r31
      40e:	ef 91       	pop	r30
      410:	df 91       	pop	r29
@@ -782,18 +535,11 @@ ISR(INT1_vect)
      436:	18 95       	reti
 
 00000438 <joystick_init>:
-static int x_middle_pos;
-static int y_middle_pos;
-
-void joystick_init()
-{
-	x_middle_pos = ADC_read(2);
      438:	82 e0       	ldi	r24, 0x02	; 2
      43a:	90 e0       	ldi	r25, 0x00	; 0
      43c:	0e 94 57 00 	call	0xae	; 0xae <ADC_read>
      440:	90 93 c3 02 	sts	0x02C3, r25
      444:	80 93 c2 02 	sts	0x02C2, r24
-	y_middle_pos = ADC_read(1);
      448:	81 e0       	ldi	r24, 0x01	; 1
      44a:	90 e0       	ldi	r25, 0x00	; 0
      44c:	0e 94 57 00 	call	0xae	; 0xae <ADC_read>
@@ -802,10 +548,6 @@ void joystick_init()
      458:	08 95       	ret
 
 0000045a <get_joystick_position>:
-}
-
-struct Position get_joystick_position()
-{
      45a:	8f 92       	push	r8
      45c:	9f 92       	push	r9
      45e:	af 92       	push	r10
@@ -816,9 +558,6 @@ struct Position get_joystick_position()
      468:	ff 92       	push	r15
      46a:	cf 93       	push	r28
      46c:	df 93       	push	r29
-	struct Position j_position;
-	
-	float x_step = (255.0 - x_middle_pos)/100.0;
      46e:	60 91 c2 02 	lds	r22, 0x02C2
      472:	70 91 c3 02 	lds	r23, 0x02C3
      476:	88 27       	eor	r24, r24
@@ -840,7 +579,6 @@ struct Position get_joystick_position()
      49a:	0e 94 59 04 	call	0x8b2	; 0x8b2 <__divsf3>
      49e:	4b 01       	movw	r8, r22
      4a0:	5c 01       	movw	r10, r24
-	float y_step = (255.0 - y_middle_pos)/100.0;
      4a2:	60 91 c0 02 	lds	r22, 0x02C0
      4a6:	70 91 c1 02 	lds	r23, 0x02C1
      4aa:	88 27       	eor	r24, r24
@@ -862,19 +600,13 @@ struct Position get_joystick_position()
      4ce:	0e 94 59 04 	call	0x8b2	; 0x8b2 <__divsf3>
      4d2:	6b 01       	movw	r12, r22
      4d4:	7c 01       	movw	r14, r24
-	
-	int x_range = ADC_read(2);
      4d6:	82 e0       	ldi	r24, 0x02	; 2
      4d8:	90 e0       	ldi	r25, 0x00	; 0
      4da:	0e 94 57 00 	call	0xae	; 0xae <ADC_read>
      4de:	ec 01       	movw	r28, r24
-	int y_range = ADC_read(1);
      4e0:	81 e0       	ldi	r24, 0x01	; 1
      4e2:	90 e0       	ldi	r25, 0x00	; 0
      4e4:	0e 94 57 00 	call	0xae	; 0xae <ADC_read>
-
-	j_position.x = (int) ((x_range - x_middle_pos)/x_step);
-	j_position.y = (int) ((y_range - y_middle_pos)/y_step);
      4e8:	20 91 c0 02 	lds	r18, 0x02C0
      4ec:	30 91 c1 02 	lds	r19, 0x02C1
      4f0:	82 1b       	sub	r24, r18
@@ -891,12 +623,6 @@ struct Position get_joystick_position()
      50a:	0e 94 c1 04 	call	0x982	; 0x982 <__fixsfsi>
      50e:	6b 01       	movw	r12, r22
      510:	7c 01       	movw	r14, r24
-	float y_step = (255.0 - y_middle_pos)/100.0;
-	
-	int x_range = ADC_read(2);
-	int y_range = ADC_read(1);
-
-	j_position.x = (int) ((x_range - x_middle_pos)/x_step);
      512:	80 91 c2 02 	lds	r24, 0x02C2
      516:	90 91 c3 02 	lds	r25, 0x02C3
      51a:	be 01       	movw	r22, r28
@@ -913,12 +639,8 @@ struct Position get_joystick_position()
      534:	0e 94 c1 04 	call	0x982	; 0x982 <__fixsfsi>
      538:	4b 01       	movw	r8, r22
      53a:	5c 01       	movw	r10, r24
-	j_position.y = (int) ((y_range - y_middle_pos)/y_step);
-	
-	return j_position;
      53c:	b4 01       	movw	r22, r8
      53e:	c6 01       	movw	r24, r12
-}
      540:	df 91       	pop	r29
      542:	cf 91       	pop	r28
      544:	ff 90       	pop	r15
@@ -932,16 +654,9 @@ struct Position get_joystick_position()
      554:	08 95       	ret
 
 00000556 <get_joystick_direction>:
-
-int get_joystick_direction(){
-	struct Position j_pos;
-	
-	j_pos = get_joystick_position();
      556:	0e 94 2d 02 	call	0x45a	; 0x45a <get_joystick_position>
      55a:	9b 01       	movw	r18, r22
      55c:	ac 01       	movw	r20, r24
-	
-	if (j_pos.x >= -10 && j_pos.x <= 10 && j_pos.y >= -10 && j_pos.y <= 10)
      55e:	fb 01       	movw	r30, r22
      560:	3a 96       	adiw	r30, 0x0a	; 10
      562:	75 97       	sbiw	r30, 0x15	; 21
@@ -950,9 +665,6 @@ int get_joystick_direction(){
      568:	3a 96       	adiw	r30, 0x0a	; 10
      56a:	75 97       	sbiw	r30, 0x15	; 21
      56c:	c8 f1       	brcs	.+114    	; 0x5e0 <get_joystick_direction+0x8a>
-	{
-		return NEUTRAL;
-	} else if (j_pos.x < -10 && abs(j_pos.x) >= abs(j_pos.y))
      56e:	26 3f       	cpi	r18, 0xF6	; 246
      570:	ef ef       	ldi	r30, 0xFF	; 255
      572:	3e 07       	cpc	r19, r30
@@ -974,9 +686,6 @@ int get_joystick_direction(){
      592:	ae 17       	cp	r26, r30
      594:	bf 07       	cpc	r27, r31
      596:	3c f5       	brge	.+78     	; 0x5e6 <get_joystick_direction+0x90>
-	{
-		return LEFT;
-	} else if (j_pos.x > 10 && j_pos.x >= abs(j_pos.y))
      598:	2b 30       	cpi	r18, 0x0B	; 11
      59a:	31 05       	cpc	r19, r1
      59c:	54 f0       	brlt	.+20     	; 0x5b2 <get_joystick_direction+0x5c>
@@ -990,9 +699,6 @@ int get_joystick_direction(){
      5ac:	2e 17       	cp	r18, r30
      5ae:	3f 07       	cpc	r19, r31
      5b0:	ec f4       	brge	.+58     	; 0x5ec <get_joystick_direction+0x96>
-	{
-		return RIGHT;
-	} else if (j_pos.y < -10 && abs(j_pos.y) > abs(j_pos.x))
      5b2:	46 3f       	cpi	r20, 0xF6	; 246
      5b4:	5f 4f       	sbci	r21, 0xFF	; 255
      5b6:	ec f4       	brge	.+58     	; 0x5f2 <get_joystick_direction+0x9c>
@@ -1013,69 +719,29 @@ int get_joystick_direction(){
      5d4:	24 17       	cp	r18, r20
      5d6:	35 07       	cpc	r19, r21
      5d8:	7c f0       	brlt	.+30     	; 0x5f8 <get_joystick_direction+0xa2>
-	{
-		return DOWN;
-	}else 
-	{
-		return UP;
      5da:	83 e0       	ldi	r24, 0x03	; 3
      5dc:	90 e0       	ldi	r25, 0x00	; 0
      5de:	08 95       	ret
-	
-	j_pos = get_joystick_position();
-	
-	if (j_pos.x >= -10 && j_pos.x <= 10 && j_pos.y >= -10 && j_pos.y <= 10)
-	{
-		return NEUTRAL;
      5e0:	80 e0       	ldi	r24, 0x00	; 0
      5e2:	90 e0       	ldi	r25, 0x00	; 0
      5e4:	08 95       	ret
-	} else if (j_pos.x < -10 && abs(j_pos.x) >= abs(j_pos.y))
-	{
-		return LEFT;
      5e6:	81 e0       	ldi	r24, 0x01	; 1
      5e8:	90 e0       	ldi	r25, 0x00	; 0
      5ea:	08 95       	ret
-	} else if (j_pos.x > 10 && j_pos.x >= abs(j_pos.y))
-	{
-		return RIGHT;
      5ec:	82 e0       	ldi	r24, 0x02	; 2
      5ee:	90 e0       	ldi	r25, 0x00	; 0
      5f0:	08 95       	ret
-	} else if (j_pos.y < -10 && abs(j_pos.y) > abs(j_pos.x))
-	{
-		return DOWN;
-	}else 
-	{
-		return UP;
      5f2:	83 e0       	ldi	r24, 0x03	; 3
      5f4:	90 e0       	ldi	r25, 0x00	; 0
      5f6:	08 95       	ret
-	} else if (j_pos.x > 10 && j_pos.x >= abs(j_pos.y))
-	{
-		return RIGHT;
-	} else if (j_pos.y < -10 && abs(j_pos.y) > abs(j_pos.x))
-	{
-		return DOWN;
      5f8:	84 e0       	ldi	r24, 0x04	; 4
      5fa:	90 e0       	ldi	r25, 0x00	; 0
-	}else 
-	{
-		return UP;
-	}
-}
      5fc:	08 95       	ret
 
 000005fe <get_left_slider>:
-
-int get_left_slider()
-{
-	int range = ADC_read(3);
      5fe:	83 e0       	ldi	r24, 0x03	; 3
      600:	90 e0       	ldi	r25, 0x00	; 0
      602:	0e 94 57 00 	call	0xae	; 0xae <ADC_read>
-	
-	return (int) ((255 - range)/2.55);
      606:	6f ef       	ldi	r22, 0xFF	; 255
      608:	70 e0       	ldi	r23, 0x00	; 0
      60a:	68 1b       	sub	r22, r24
@@ -1091,20 +757,13 @@ int get_left_slider()
      620:	50 e4       	ldi	r21, 0x40	; 64
      622:	0e 94 59 04 	call	0x8b2	; 0x8b2 <__divsf3>
      626:	0e 94 c1 04 	call	0x982	; 0x982 <__fixsfsi>
-}
      62a:	cb 01       	movw	r24, r22
      62c:	08 95       	ret
 
 0000062e <get_right_slider>:
-
-int get_right_slider()
-{
-	int range = ADC_read(4);
      62e:	84 e0       	ldi	r24, 0x04	; 4
      630:	90 e0       	ldi	r25, 0x00	; 0
      632:	0e 94 57 00 	call	0xae	; 0xae <ADC_read>
-	
-	return (int) (range/2.55);
      636:	bc 01       	movw	r22, r24
      638:	88 27       	eor	r24, r24
      63a:	77 fd       	sbrc	r23, 7
@@ -1117,29 +776,16 @@ int get_right_slider()
      64a:	50 e4       	ldi	r21, 0x40	; 64
      64c:	0e 94 59 04 	call	0x8b2	; 0x8b2 <__divsf3>
      650:	0e 94 c1 04 	call	0x982	; 0x982 <__fixsfsi>
-}
      654:	cb 01       	movw	r24, r22
      656:	08 95       	ret
 
 00000658 <get_joystick_push>:
-
-int get_joystick_push()
-{
-	uint8_t push = (PINB & 0b00000001);
      658:	86 b3       	in	r24, 0x16	; 22
-	
-	return push;
      65a:	81 70       	andi	r24, 0x01	; 1
      65c:	90 e0       	ldi	r25, 0x00	; 0
      65e:	08 95       	ret
 
 00000660 <test_send_joystick>:
-		current_state = move_arrow(dir, current_state, &arrow_max, &arrow_pos);
-	}
-}
-
-void test_send_joystick()
-{
      660:	df 92       	push	r13
      662:	ef 92       	push	r14
      664:	ff 92       	push	r15
@@ -1155,62 +801,29 @@ void test_send_joystick()
      678:	de bf       	out	0x3e, r29	; 62
      67a:	0f be       	out	0x3f, r0	; 63
      67c:	cd bf       	out	0x3d, r28	; 61
-	struct Position j_pos;
-	uint8_t sliderL;
-	uint8_t sliderR = 0;
-	uint8_t push = 0;
-	
-	j_pos = get_joystick_position();
      67e:	0e 94 2d 02 	call	0x45a	; 0x45a <get_joystick_position>
      682:	d6 2e       	mov	r13, r22
      684:	e8 2e       	mov	r14, r24
-	sliderL = get_left_slider();
      686:	0e 94 ff 02 	call	0x5fe	; 0x5fe <get_left_slider>
      68a:	f8 2e       	mov	r15, r24
-	sliderR = get_right_slider();
      68c:	0e 94 17 03 	call	0x62e	; 0x62e <get_right_slider>
      690:	08 2f       	mov	r16, r24
-	enum direction dir = get_joystick_direction();
      692:	0e 94 ab 02 	call	0x556	; 0x556 <get_joystick_direction>
      696:	18 2f       	mov	r17, r24
-	push = get_joystick_push();
      698:	0e 94 2c 03 	call	0x658	; 0x658 <get_joystick_push>
-	
-	can_message msg;
-	msg.id = 1;
      69c:	91 e0       	ldi	r25, 0x01	; 1
      69e:	99 83       	std	Y+1, r25	; 0x01
-	msg.data[0] = j_pos.x;
      6a0:	db 82       	std	Y+3, r13	; 0x03
-	msg.data[1] = j_pos.y;
      6a2:	ec 82       	std	Y+4, r14	; 0x04
-	uint8_t sliderL;
-	uint8_t sliderR = 0;
-	uint8_t push = 0;
-	
-	j_pos = get_joystick_position();
-	sliderL = get_left_slider();
      6a4:	fd 82       	std	Y+5, r15	; 0x05
-	sliderR = get_right_slider();
      6a6:	0e 83       	std	Y+6, r16	; 0x06
-	enum direction dir = get_joystick_direction();
      6a8:	1f 83       	std	Y+7, r17	; 0x07
-	push = get_joystick_push();
      6aa:	88 87       	std	Y+8, r24	; 0x08
-	msg.data[1] = j_pos.y;
-	msg.data[2] = sliderL;
-	msg.data[3] = sliderR;
-	msg.data[4] = dir;
-	msg.data[5] = push;
-	msg.length = 6;
      6ac:	86 e0       	ldi	r24, 0x06	; 6
      6ae:	8a 83       	std	Y+2, r24	; 0x02
-	
-	can_send_msg(&msg);
      6b0:	ce 01       	movw	r24, r28
      6b2:	01 96       	adiw	r24, 0x01	; 1
      6b4:	0e 94 05 01 	call	0x20a	; 0x20a <can_send_msg>
-}
      6b8:	2a 96       	adiw	r28, 0x0a	; 10
      6ba:	0f b6       	in	r0, 0x3f	; 63
      6bc:	f8 94       	cli
@@ -1227,39 +840,20 @@ void test_send_joystick()
      6d2:	08 95       	ret
 
 000006d4 <main>:
-
-int main(void)
-{
-	// Initializations
-	USART_Init(MYUBRR);
      6d4:	8f e1       	ldi	r24, 0x1F	; 31
      6d6:	90 e0       	ldi	r25, 0x00	; 0
      6d8:	0e 94 e7 03 	call	0x7ce	; 0x7ce <USART_Init>
-	SRAM_init();
      6dc:	0e 94 d8 03 	call	0x7b0	; 0x7b0 <SRAM_init>
-	joystick_init();
      6e0:	0e 94 1c 02 	call	0x438	; 0x438 <joystick_init>
-	oled_init();
      6e4:	0e 94 96 03 	call	0x72c	; 0x72c <oled_init>
-	spi_init();
      6e8:	0e 94 cd 03 	call	0x79a	; 0x79a <spi_init>
-	can_controller_init();
      6ec:	0e 94 b8 00 	call	0x170	; 0x170 <can_controller_init>
-	can_init();
      6f0:	0e 94 e4 00 	call	0x1c8	; 0x1c8 <can_init>
-	
-	printf("START============================\n\r");
      6f4:	8f e8       	ldi	r24, 0x8F	; 143
      6f6:	92 e0       	ldi	r25, 0x02	; 2
      6f8:	9f 93       	push	r25
      6fa:	8f 93       	push	r24
      6fc:	0e 94 f2 06 	call	0xde4	; 0xde4 <printf>
-	
-	//can_driver_test();
-	
-	
-	uint8_t test = -100;
-	printf("TESTE: %d\n\r",test);
      700:	1f 92       	push	r1
      702:	8c e9       	ldi	r24, 0x9C	; 156
      704:	8f 93       	push	r24
@@ -1274,10 +868,6 @@ int main(void)
      718:	0f 90       	pop	r0
      71a:	0f 90       	pop	r0
      71c:	0f 90       	pop	r0
-	
-	while (1)
-	{
-		test_send_joystick();
      71e:	0e 94 30 03 	call	0x660	; 0x660 <test_send_joystick>
      722:	80 e0       	ldi	r24, 0x00	; 0
      724:	90 ef       	ldi	r25, 0xF0	; 240

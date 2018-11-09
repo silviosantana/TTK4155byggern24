@@ -97,7 +97,7 @@ void motor_driver_test()
 }
 
 
-void motor_move(int dir, int8_t speed)
+void motor_move(int dir, uint8_t speed)
 {
 	uint16_t encoder_motor;
 	
@@ -108,13 +108,10 @@ void motor_move(int dir, int8_t speed)
 	set_bit(PORTH, MJ1_EN);
 	
 	//printf("SPEED: %d\n\r", speed);
-	
-	speed = abs(speed);
-	//printf("%d\n\r", speed);
 
 	if (dir == RIGHT)
 	{
-		//printf("LEFT\n\r");
+		//printf("LEFT:%d\n\r", speed);
 		set_bit(PORTH, MJ1_DIR);
 	}else if (dir == LEFT)
 	{

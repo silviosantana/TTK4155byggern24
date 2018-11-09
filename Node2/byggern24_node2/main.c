@@ -39,7 +39,7 @@ int main(void)
 	{
 		//printf("inside while \n\r");
 		score = record_score(score);
-		printf("ADC read: %d\t Score: %d\n\r", adc_read(0), score);
+		//printf("ADC read: %d\t Score: %d\n\r", adc_read(0), score);
 		//motor_driver_test();
 		//printf("after score \n\r");
 		//value = value + 1;
