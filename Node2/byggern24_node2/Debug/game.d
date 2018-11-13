@@ -14,7 +14,7 @@ game.d game.o: .././game.c .././game.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\util\delay.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\util\delay_basic.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\math.h \
- .././util.h .././adc_driver.h
+ .././util.h .././adc_driver.h .././motor_controller.h
 
 .././game.h:
 
@@ -51,3 +51,5 @@ c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-g
 .././util.h:
 
 .././adc_driver.h:
+
+.././motor_controller.h:

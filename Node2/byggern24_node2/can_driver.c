@@ -11,6 +11,7 @@
 #include "timer_driver.h"
 #include "motor_driver.h"
 #include "motor_controller.h"
+#include "game.h"
 
 
 ISR(INT4_vect)
@@ -23,6 +24,7 @@ ISR(INT4_vect)
 	uint8_t canInt = can_controller_read(MCP_CANINTF);
 	if ((canInt & MCP_RX0IF) == MCP_RX0IF)
 	{
+		//printf("HERE\n\r");
 		can_recieve_msg(0, msg);
 		
 		//printf("X:\tY:\tLeft:\tRight:\tDir:\tpush:\n\r");
@@ -37,10 +39,21 @@ ISR(INT4_vect)
 		control_solenoid(msg->data[5]);
 		
 		// Control Motor
-		//control_motor(msg->data[4], msg->data[0]);
-		motor_controller_set_point(msg->data[2]);
+		if(game_get_mode() == 1)
+		{
+			motor_controller_set_point(msg->data[2]);
+		}else
+		{
+			motor_move_joystick(msg->data[4], msg->data[0]);
+		}
 		
-		//printf("\n\r");
+		//Check Toggle Game Mode
+		if (msg->data[6] == 2)
+		{
+			game_toggle_mode();
+		}
+		
+		//printf("BUTTON: %d | GAME MODE: %d\n\r", msg->data[6], game_get_mode());
 		
 	}
 // 	else if ((canInt & MCP_RX1IF) == MCP_RX1IF)

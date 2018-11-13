@@ -96,14 +96,30 @@ void motor_driver_test()
 	printf("MOTOR COUNTER: %d \n\r", encoder_motor);
 }
 
+void motor_move_joystick(int dir, int8_t speed)
+{
+	//set motor EN to 1
+	set_bit(PORTH, MJ1_EN);
+	
+	//printf("SPEED: %d\n\r", speed);
+
+	if (dir == RIGHT)
+	{
+		//printf("LEFT:%d\n\r", speed);
+		set_bit(PORTH, MJ1_DIR);
+	}else if (dir == LEFT)
+	{
+		//printf("RIGHT\n\r");
+		clear_bit(PORTH, MJ1_DIR);
+	}
+
+	uint8_t speed_converted = (uint8_t) abs((int)(speed*1.3));
+	//printf("DIR: %d | SPEED: %d | SP_conv: %d\n\r", dir, speed, speed_converted);
+	motor_set_speed(speed_converted);
+}
 
 void motor_move(int dir, uint8_t speed)
 {
-	uint16_t encoder_motor;
-	
-	encoder_motor = motor_get_encoder();
-	//printf("MOTOR COUNTER: %d \n\r", encoder_motor);
-	
 	//set motor EN to 1
 	set_bit(PORTH, MJ1_EN);
 	

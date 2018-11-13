@@ -66,9 +66,16 @@ int get_right_slider()
 	return (int) (range/2.55);
 }
 
-int get_joystick_push()
+int get_joystick_right_button()
 {
 	uint8_t push = (PINB & 0b00000001);
+	
+	return push;
+}
+
+int get_joystick_left_button()
+{
+	uint8_t push = (PINB & 0b00000010);
 	
 	return push;
 }

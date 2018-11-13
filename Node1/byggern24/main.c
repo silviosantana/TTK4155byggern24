@@ -126,14 +126,14 @@ void test_send_joystick()
 	struct Position j_pos;
 	uint8_t sliderL;
 	uint8_t sliderR = 0;
-	uint8_t push = 0;
+	uint8_t r_button, l_button;
 	
 	j_pos = get_joystick_position();
 	sliderL = get_left_slider();
 	sliderR = get_right_slider();
 	enum direction dir = get_joystick_direction();
-	push = get_joystick_push();
-	
+	r_button = get_joystick_right_button();
+	l_button = get_joystick_left_button();
 	can_message msg;
 	msg.id = 1;
 	msg.data[0] = j_pos.x;
@@ -141,8 +141,9 @@ void test_send_joystick()
 	msg.data[2] = sliderL;
 	msg.data[3] = sliderR;
 	msg.data[4] = dir;
-	msg.data[5] = push;
-	msg.length = 6;
+	msg.data[5] = r_button;
+	msg.data[6] = l_button;
+	msg.length = 7;
 	
 	can_send_msg(&msg);
 }

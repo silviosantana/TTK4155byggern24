@@ -21,13 +21,15 @@ int main(void)
 	cli();
 	USART_Init(MYUBRR);
 	spi_init();
-	can_controller_init();
-	can_init();
+	
 	timer_driver_init();
 	adc_init();
 	dac_init();
 	motor_init();
+	game_init();
 	motor_controller_init();
+	can_controller_init();
+	can_init();
 	sei();
 	
 	printf("Hello from node 2!\n\r");
