@@ -385,6 +385,30 @@ void oled_print_mario_large(uint8_t row,uint8_t column)
 	oled_print_special_char(25);
 }
 
+void oled_print_ntnu_logo(uint8_t row, uint8_t column)
+{
+	oled_pos(row, column);
+	oled_print_special_char(26);
+	oled_print_special_char(27);
+	oled_print_special_char(28);
+	oled_print_special_char(29);
+	oled_pos(row + 1, column);
+	oled_print_special_char(30);
+	oled_print_special_char(31);
+	oled_print_special_char(32);
+	oled_print_special_char(33);
+	oled_pos(row + 2, column);
+	oled_print_special_char(34);
+	oled_print_special_char(35);
+	oled_print_special_char(36);
+	oled_print_special_char(37);
+	oled_pos(row + 3, column);
+	oled_print_special_char(38);
+	oled_print_special_char(39);
+	oled_print_special_char(40);
+	oled_print_special_char(41);
+	}
+
 void oled_test(){
 
 	oled_reset();
@@ -394,7 +418,7 @@ void oled_test(){
 
 	//oled_print_arrow(2, 64);
 	oled_animate_mario_large();
-
+	oled_print_ntnu_logo();
 	//oled_line(65, 63, 26, 12);
 	//oled_circle(80,30,21);
 	
