@@ -15,7 +15,7 @@ can_controller_driver.d can_controller_driver.o: \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\util\delay.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\util\delay_basic.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-gnu-toolchain\avr\include\math.h \
- .././spi_driver.h .././util.h
+ .././spi_driver.h .././util.h .././MCP2515.h
 
 .././can_controller_driver.h:
 
@@ -52,3 +52,5 @@ c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1061\avr8-g
 .././spi_driver.h:
 
 .././util.h:
+
+.././MCP2515.h:

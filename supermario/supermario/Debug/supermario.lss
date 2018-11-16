@@ -1,0 +1,523 @@
+
+supermario.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000224  00800100  00000366  000003fa  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         00000366  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .bss          00000011  00800324  00800324  0000061e  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  0000061e  2**0
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000030  00000000  00000000  0000064e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000303  00000000  00000000  0000067e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 0000016b  00000000  00000000  00000981  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   000001a6  00000000  00000000  00000aec  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000044  00000000  00000000  00000c94  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000217  00000000  00000000  00000cd8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    000000f5  00000000  00000000  00000eef  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000038  00000000  00000000  00000fe4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+   4:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+   8:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+   c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  10:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  14:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  18:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  1c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  20:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  24:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  28:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  2c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  30:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  34:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  38:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  3c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  40:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  44:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  48:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  4c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  50:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  54:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  58:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  5c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  60:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  64:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+
+00000068 <__ctors_end>:
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d8 e0       	ldi	r29, 0x08	; 8
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+
+00000074 <__do_copy_data>:
+  74:	13 e0       	ldi	r17, 0x03	; 3
+  76:	a0 e0       	ldi	r26, 0x00	; 0
+  78:	b1 e0       	ldi	r27, 0x01	; 1
+  7a:	e6 e6       	ldi	r30, 0x66	; 102
+  7c:	f3 e0       	ldi	r31, 0x03	; 3
+  7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
+  80:	05 90       	lpm	r0, Z+
+  82:	0d 92       	st	X+, r0
+  84:	a4 32       	cpi	r26, 0x24	; 36
+  86:	b1 07       	cpc	r27, r17
+  88:	d9 f7       	brne	.-10     	; 0x80 <__do_copy_data+0xc>
+
+0000008a <__do_clear_bss>:
+  8a:	23 e0       	ldi	r18, 0x03	; 3
+  8c:	a4 e2       	ldi	r26, 0x24	; 36
+  8e:	b3 e0       	ldi	r27, 0x03	; 3
+  90:	01 c0       	rjmp	.+2      	; 0x94 <.do_clear_bss_start>
+
+00000092 <.do_clear_bss_loop>:
+  92:	1d 92       	st	X+, r1
+
+00000094 <.do_clear_bss_start>:
+  94:	a5 33       	cpi	r26, 0x35	; 53
+  96:	b2 07       	cpc	r27, r18
+  98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
+  9a:	0e 94 6e 00 	call	0xdc	; 0xdc <main>
+  9e:	0c 94 b1 01 	jmp	0x362	; 0x362 <_exit>
+
+000000a2 <__bad_interrupt>:
+  a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+000000a6 <music_delay>:
+uint16_t* current_song;
+uint8_t pick_song;
+
+
+void music_delay(uint16_t delay) {
+	while (delay--) {
+  a6:	00 97       	sbiw	r24, 0x00	; 0
+  a8:	31 f0       	breq	.+12     	; 0xb6 <music_delay+0x10>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  aa:	24 e0       	ldi	r18, 0x04	; 4
+  ac:	2a 95       	dec	r18
+  ae:	f1 f7       	brne	.-4      	; 0xac <music_delay+0x6>
+  b0:	01 97       	sbiw	r24, 0x01	; 1
+  b2:	00 97       	sbiw	r24, 0x00	; 0
+  b4:	d1 f7       	brne	.-12     	; 0xaa <music_delay+0x4>
+  b6:	08 95       	ret
+
+000000b8 <init>:
+	}
+}
+
+void init()
+{
+	set_bit(DDRD, melody_pin);
+  b8:	53 9a       	sbi	0x0a, 3	; 10
+	clear_bit(DDRD, DDD7);
+  ba:	57 98       	cbi	0x0a, 7	; 10
+	clear_bit(DDRD, DDD6);	
+  bc:	56 98       	cbi	0x0a, 6	; 10
+
+	bpm = 0;
+  be:	10 92 2e 03 	sts	0x032E, r1
+	note_pointer = 0;
+  c2:	10 92 2c 03 	sts	0x032C, r1
+	pick_song = UNDERWORLD;
+  c6:	10 92 2d 03 	sts	0x032D, r1
+	key = 0;
+  ca:	10 92 30 03 	sts	0x0330, r1
+  ce:	10 92 2f 03 	sts	0x032F, r1
+	note = 0;
+  d2:	10 92 32 03 	sts	0x0332, r1
+  d6:	10 92 31 03 	sts	0x0331, r1
+  da:	08 95       	ret
+
+000000dc <main>:
+}
+
+int main(void) {
+	init();
+  dc:	0e 94 5c 00 	call	0xb8	; 0xb8 <init>
+			else {
+				num_cycles = length*1000/2/key;				// Duration of key-tone
+			}
+			
+			// Play tone on Melody_pin
+			for (uint32_t i = 0; i < num_cycles; i++) {
+  e0:	81 2c       	mov	r8, r1
+  e2:	91 2c       	mov	r9, r1
+  e4:	31 2c       	mov	r3, r1
+  e6:	21 2c       	mov	r2, r1
+			key = current_song[note_pointer];
+			length = note/bpm;
+			
+			// Make room for pause notes
+			if (key == 0) {
+				key = 500;
+  e8:	0f 2e       	mov	r0, r31
+  ea:	f4 ef       	ldi	r31, 0xF4	; 244
+  ec:	af 2e       	mov	r10, r31
+  ee:	bb 24       	eor	r11, r11
+  f0:	b3 94       	inc	r11
+  f2:	f0 2d       	mov	r31, r0
+				num_cycles = length*1000/2/key;
+  f4:	0f 2e       	mov	r0, r31
+  f6:	f4 ef       	ldi	r31, 0xF4	; 244
+  f8:	4f 2e       	mov	r4, r31
+  fa:	55 24       	eor	r5, r5
+  fc:	53 94       	inc	r5
+  fe:	61 2c       	mov	r6, r1
+ 100:	71 2c       	mov	r7, r1
+ 102:	f0 2d       	mov	r31, r0
+			{
+				current_song = mario_melody;
+				bpm = mario_melody[0];
+			}else if (pick_song == 0)
+			{
+				current_song = underworld_melody;
+ 104:	c0 e0       	ldi	r28, 0x00	; 0
+ 106:	d1 e0       	ldi	r29, 0x01	; 1
+		play_song = (PIND & 0b01000000);
+		if (play_song == 64)
+		{
+			if (pick_song == 128)
+			{
+				current_song = mario_melody;
+ 108:	06 ee       	ldi	r16, 0xE6	; 230
+ 10a:	11 e0       	ldi	r17, 0x01	; 1
+
+int main(void) {
+	init();
+	int play_song;
+	while(1) {
+		pick_song = (PIND & 0b10000000);
+ 10c:	89 b1       	in	r24, 0x09	; 9
+ 10e:	80 78       	andi	r24, 0x80	; 128
+ 110:	80 93 2d 03 	sts	0x032D, r24
+		play_song = (PIND & 0b01000000);
+		if (play_song == 64)
+ 114:	4e 9b       	sbis	0x09, 6	; 9
+ 116:	d2 c0       	rjmp	.+420    	; 0x2bc <main+0x1e0>
+		{
+			if (pick_song == 128)
+ 118:	80 38       	cpi	r24, 0x80	; 128
+ 11a:	49 f4       	brne	.+18     	; 0x12e <main+0x52>
+			{
+				current_song = mario_melody;
+ 11c:	10 93 34 03 	sts	0x0334, r17
+ 120:	00 93 33 03 	sts	0x0333, r16
+				bpm = mario_melody[0];
+ 124:	f8 01       	movw	r30, r16
+ 126:	80 81       	ld	r24, Z
+ 128:	80 93 2e 03 	sts	0x032E, r24
+ 12c:	09 c0       	rjmp	.+18     	; 0x140 <main+0x64>
+			}else if (pick_song == 0)
+ 12e:	81 11       	cpse	r24, r1
+ 130:	07 c0       	rjmp	.+14     	; 0x140 <main+0x64>
+			{
+				current_song = underworld_melody;
+ 132:	d0 93 34 03 	sts	0x0334, r29
+ 136:	c0 93 33 03 	sts	0x0333, r28
+				bpm = underworld_melody[0];
+ 13a:	88 81       	ld	r24, Y
+ 13c:	80 93 2e 03 	sts	0x032E, r24
+			}
+
+			// Play next tone in the song
+			note_pointer++;
+ 140:	40 91 2c 03 	lds	r20, 0x032C
+ 144:	e1 e0       	ldi	r30, 0x01	; 1
+ 146:	e4 0f       	add	r30, r20
+ 148:	e0 93 2c 03 	sts	0x032C, r30
+			note = current_song[note_pointer];
+ 14c:	20 91 33 03 	lds	r18, 0x0333
+ 150:	30 91 34 03 	lds	r19, 0x0334
+ 154:	f0 e0       	ldi	r31, 0x00	; 0
+ 156:	ee 0f       	add	r30, r30
+ 158:	ff 1f       	adc	r31, r31
+ 15a:	e2 0f       	add	r30, r18
+ 15c:	f3 1f       	adc	r31, r19
+ 15e:	80 81       	ld	r24, Z
+ 160:	91 81       	ldd	r25, Z+1	; 0x01
+ 162:	90 93 32 03 	sts	0x0332, r25
+ 166:	80 93 31 03 	sts	0x0331, r24
+			note_pointer++;
+ 16a:	4e 5f       	subi	r20, 0xFE	; 254
+ 16c:	40 93 2c 03 	sts	0x032C, r20
+			key = current_song[note_pointer];
+ 170:	50 e0       	ldi	r21, 0x00	; 0
+ 172:	44 0f       	add	r20, r20
+ 174:	55 1f       	adc	r21, r21
+ 176:	f9 01       	movw	r30, r18
+ 178:	e4 0f       	add	r30, r20
+ 17a:	f5 1f       	adc	r31, r21
+ 17c:	01 90       	ld	r0, Z+
+ 17e:	f0 81       	ld	r31, Z
+ 180:	e0 2d       	mov	r30, r0
+ 182:	f0 93 30 03 	sts	0x0330, r31
+ 186:	e0 93 2f 03 	sts	0x032F, r30
+			length = note/bpm;
+ 18a:	60 91 2e 03 	lds	r22, 0x032E
+ 18e:	70 e0       	ldi	r23, 0x00	; 0
+ 190:	0e 94 61 01 	call	0x2c2	; 0x2c2 <__udivmodhi4>
+ 194:	9b 01       	movw	r18, r22
+ 196:	40 e0       	ldi	r20, 0x00	; 0
+ 198:	50 e0       	ldi	r21, 0x00	; 0
+ 19a:	20 93 24 03 	sts	0x0324, r18
+ 19e:	30 93 25 03 	sts	0x0325, r19
+ 1a2:	40 93 26 03 	sts	0x0326, r20
+ 1a6:	50 93 27 03 	sts	0x0327, r21
+			
+			// Make room for pause notes
+			if (key == 0) {
+ 1aa:	30 97       	sbiw	r30, 0x00	; 0
+ 1ac:	c9 f4       	brne	.+50     	; 0x1e0 <main+0x104>
+				key = 500;
+ 1ae:	b0 92 30 03 	sts	0x0330, r11
+ 1b2:	a0 92 2f 03 	sts	0x032F, r10
+				num_cycles = length*1000/2/key;
+ 1b6:	a8 ee       	ldi	r26, 0xE8	; 232
+ 1b8:	b3 e0       	ldi	r27, 0x03	; 3
+ 1ba:	0e 94 97 01 	call	0x32e	; 0x32e <__muluhisi3>
+ 1be:	96 95       	lsr	r25
+ 1c0:	87 95       	ror	r24
+ 1c2:	77 95       	ror	r23
+ 1c4:	67 95       	ror	r22
+ 1c6:	a3 01       	movw	r20, r6
+ 1c8:	92 01       	movw	r18, r4
+ 1ca:	0e 94 75 01 	call	0x2ea	; 0x2ea <__udivmodsi4>
+ 1ce:	20 93 28 03 	sts	0x0328, r18
+ 1d2:	30 93 29 03 	sts	0x0329, r19
+ 1d6:	40 93 2a 03 	sts	0x032A, r20
+ 1da:	50 93 2b 03 	sts	0x032B, r21
+ 1de:	15 c0       	rjmp	.+42     	; 0x20a <main+0x12e>
+			}
+			else {
+				num_cycles = length*1000/2/key;				// Duration of key-tone
+ 1e0:	a8 ee       	ldi	r26, 0xE8	; 232
+ 1e2:	b3 e0       	ldi	r27, 0x03	; 3
+ 1e4:	0e 94 97 01 	call	0x32e	; 0x32e <__muluhisi3>
+ 1e8:	96 95       	lsr	r25
+ 1ea:	87 95       	ror	r24
+ 1ec:	77 95       	ror	r23
+ 1ee:	67 95       	ror	r22
+ 1f0:	9f 01       	movw	r18, r30
+ 1f2:	40 e0       	ldi	r20, 0x00	; 0
+ 1f4:	50 e0       	ldi	r21, 0x00	; 0
+ 1f6:	0e 94 75 01 	call	0x2ea	; 0x2ea <__udivmodsi4>
+ 1fa:	20 93 28 03 	sts	0x0328, r18
+ 1fe:	30 93 29 03 	sts	0x0329, r19
+ 202:	40 93 2a 03 	sts	0x032A, r20
+ 206:	50 93 2b 03 	sts	0x032B, r21
+			}
+			
+			// Play tone on Melody_pin
+			for (uint32_t i = 0; i < num_cycles; i++) {
+ 20a:	80 91 28 03 	lds	r24, 0x0328
+ 20e:	90 91 29 03 	lds	r25, 0x0329
+ 212:	a0 91 2a 03 	lds	r26, 0x032A
+ 216:	b0 91 2b 03 	lds	r27, 0x032B
+ 21a:	89 2b       	or	r24, r25
+ 21c:	8a 2b       	or	r24, r26
+ 21e:	8b 2b       	or	r24, r27
+ 220:	d1 f1       	breq	.+116    	; 0x296 <main+0x1ba>
+ 222:	c8 2c       	mov	r12, r8
+ 224:	d9 2c       	mov	r13, r9
+ 226:	e3 2c       	mov	r14, r3
+ 228:	f2 2c       	mov	r15, r2
+				if (key == 500) {
+ 22a:	80 91 2f 03 	lds	r24, 0x032F
+ 22e:	90 91 30 03 	lds	r25, 0x0330
+ 232:	84 3f       	cpi	r24, 0xF4	; 244
+ 234:	91 40       	sbci	r25, 0x01	; 1
+ 236:	79 f4       	brne	.+30     	; 0x256 <main+0x17a>
+					clear_bit(PORTD,melody_pin);
+ 238:	5b 98       	cbi	0x0b, 3	; 11
+					music_delay(key);
+ 23a:	80 91 2f 03 	lds	r24, 0x032F
+ 23e:	90 91 30 03 	lds	r25, 0x0330
+ 242:	0e 94 53 00 	call	0xa6	; 0xa6 <music_delay>
+					clear_bit(PORTD,melody_pin);
+ 246:	5b 98       	cbi	0x0b, 3	; 11
+					music_delay(key);
+ 248:	80 91 2f 03 	lds	r24, 0x032F
+ 24c:	90 91 30 03 	lds	r25, 0x0330
+ 250:	0e 94 53 00 	call	0xa6	; 0xa6 <music_delay>
+ 254:	0e c0       	rjmp	.+28     	; 0x272 <main+0x196>
+					} else {
+					set_bit(PORTD,melody_pin);
+ 256:	5b 9a       	sbi	0x0b, 3	; 11
+					music_delay(key);
+ 258:	80 91 2f 03 	lds	r24, 0x032F
+ 25c:	90 91 30 03 	lds	r25, 0x0330
+ 260:	0e 94 53 00 	call	0xa6	; 0xa6 <music_delay>
+					clear_bit(PORTD, melody_pin);
+ 264:	5b 98       	cbi	0x0b, 3	; 11
+					music_delay(key);
+ 266:	80 91 2f 03 	lds	r24, 0x032F
+ 26a:	90 91 30 03 	lds	r25, 0x0330
+ 26e:	0e 94 53 00 	call	0xa6	; 0xa6 <music_delay>
+			else {
+				num_cycles = length*1000/2/key;				// Duration of key-tone
+			}
+			
+			// Play tone on Melody_pin
+			for (uint32_t i = 0; i < num_cycles; i++) {
+ 272:	2f ef       	ldi	r18, 0xFF	; 255
+ 274:	c2 1a       	sub	r12, r18
+ 276:	d2 0a       	sbc	r13, r18
+ 278:	e2 0a       	sbc	r14, r18
+ 27a:	f2 0a       	sbc	r15, r18
+ 27c:	80 91 28 03 	lds	r24, 0x0328
+ 280:	90 91 29 03 	lds	r25, 0x0329
+ 284:	a0 91 2a 03 	lds	r26, 0x032A
+ 288:	b0 91 2b 03 	lds	r27, 0x032B
+ 28c:	c8 16       	cp	r12, r24
+ 28e:	d9 06       	cpc	r13, r25
+ 290:	ea 06       	cpc	r14, r26
+ 292:	fb 06       	cpc	r15, r27
+ 294:	50 f2       	brcs	.-108    	; 0x22a <main+0x14e>
+ 296:	8f e5       	ldi	r24, 0x5F	; 95
+ 298:	9a ee       	ldi	r25, 0xEA	; 234
+ 29a:	01 97       	sbiw	r24, 0x01	; 1
+ 29c:	f1 f7       	brne	.-4      	; 0x29a <main+0x1be>
+ 29e:	00 c0       	rjmp	.+0      	; 0x2a0 <main+0x1c4>
+ 2a0:	00 00       	nop
+			}
+			
+			// Small delay between each tone
+			_delay_us(SIXTEENTH);
+			// If key was zero, set zero again in case song is over
+			if (key == 500) {
+ 2a2:	80 91 2f 03 	lds	r24, 0x032F
+ 2a6:	90 91 30 03 	lds	r25, 0x0330
+ 2aa:	84 3f       	cpi	r24, 0xF4	; 244
+ 2ac:	91 40       	sbci	r25, 0x01	; 1
+ 2ae:	09 f0       	breq	.+2      	; 0x2b2 <main+0x1d6>
+ 2b0:	2d cf       	rjmp	.-422    	; 0x10c <main+0x30>
+				key = 0;
+ 2b2:	10 92 30 03 	sts	0x0330, r1
+ 2b6:	10 92 2f 03 	sts	0x032F, r1
+ 2ba:	28 cf       	rjmp	.-432    	; 0x10c <main+0x30>
+			}
+		}else{
+			note_pointer = 0;
+ 2bc:	10 92 2c 03 	sts	0x032C, r1
+ 2c0:	25 cf       	rjmp	.-438    	; 0x10c <main+0x30>
+
+000002c2 <__udivmodhi4>:
+ 2c2:	aa 1b       	sub	r26, r26
+ 2c4:	bb 1b       	sub	r27, r27
+ 2c6:	51 e1       	ldi	r21, 0x11	; 17
+ 2c8:	07 c0       	rjmp	.+14     	; 0x2d8 <__udivmodhi4_ep>
+
+000002ca <__udivmodhi4_loop>:
+ 2ca:	aa 1f       	adc	r26, r26
+ 2cc:	bb 1f       	adc	r27, r27
+ 2ce:	a6 17       	cp	r26, r22
+ 2d0:	b7 07       	cpc	r27, r23
+ 2d2:	10 f0       	brcs	.+4      	; 0x2d8 <__udivmodhi4_ep>
+ 2d4:	a6 1b       	sub	r26, r22
+ 2d6:	b7 0b       	sbc	r27, r23
+
+000002d8 <__udivmodhi4_ep>:
+ 2d8:	88 1f       	adc	r24, r24
+ 2da:	99 1f       	adc	r25, r25
+ 2dc:	5a 95       	dec	r21
+ 2de:	a9 f7       	brne	.-22     	; 0x2ca <__udivmodhi4_loop>
+ 2e0:	80 95       	com	r24
+ 2e2:	90 95       	com	r25
+ 2e4:	bc 01       	movw	r22, r24
+ 2e6:	cd 01       	movw	r24, r26
+ 2e8:	08 95       	ret
+
+000002ea <__udivmodsi4>:
+ 2ea:	a1 e2       	ldi	r26, 0x21	; 33
+ 2ec:	1a 2e       	mov	r1, r26
+ 2ee:	aa 1b       	sub	r26, r26
+ 2f0:	bb 1b       	sub	r27, r27
+ 2f2:	fd 01       	movw	r30, r26
+ 2f4:	0d c0       	rjmp	.+26     	; 0x310 <__udivmodsi4_ep>
+
+000002f6 <__udivmodsi4_loop>:
+ 2f6:	aa 1f       	adc	r26, r26
+ 2f8:	bb 1f       	adc	r27, r27
+ 2fa:	ee 1f       	adc	r30, r30
+ 2fc:	ff 1f       	adc	r31, r31
+ 2fe:	a2 17       	cp	r26, r18
+ 300:	b3 07       	cpc	r27, r19
+ 302:	e4 07       	cpc	r30, r20
+ 304:	f5 07       	cpc	r31, r21
+ 306:	20 f0       	brcs	.+8      	; 0x310 <__udivmodsi4_ep>
+ 308:	a2 1b       	sub	r26, r18
+ 30a:	b3 0b       	sbc	r27, r19
+ 30c:	e4 0b       	sbc	r30, r20
+ 30e:	f5 0b       	sbc	r31, r21
+
+00000310 <__udivmodsi4_ep>:
+ 310:	66 1f       	adc	r22, r22
+ 312:	77 1f       	adc	r23, r23
+ 314:	88 1f       	adc	r24, r24
+ 316:	99 1f       	adc	r25, r25
+ 318:	1a 94       	dec	r1
+ 31a:	69 f7       	brne	.-38     	; 0x2f6 <__udivmodsi4_loop>
+ 31c:	60 95       	com	r22
+ 31e:	70 95       	com	r23
+ 320:	80 95       	com	r24
+ 322:	90 95       	com	r25
+ 324:	9b 01       	movw	r18, r22
+ 326:	ac 01       	movw	r20, r24
+ 328:	bd 01       	movw	r22, r26
+ 32a:	cf 01       	movw	r24, r30
+ 32c:	08 95       	ret
+
+0000032e <__muluhisi3>:
+ 32e:	0e 94 a2 01 	call	0x344	; 0x344 <__umulhisi3>
+ 332:	a5 9f       	mul	r26, r21
+ 334:	90 0d       	add	r25, r0
+ 336:	b4 9f       	mul	r27, r20
+ 338:	90 0d       	add	r25, r0
+ 33a:	a4 9f       	mul	r26, r20
+ 33c:	80 0d       	add	r24, r0
+ 33e:	91 1d       	adc	r25, r1
+ 340:	11 24       	eor	r1, r1
+ 342:	08 95       	ret
+
+00000344 <__umulhisi3>:
+ 344:	a2 9f       	mul	r26, r18
+ 346:	b0 01       	movw	r22, r0
+ 348:	b3 9f       	mul	r27, r19
+ 34a:	c0 01       	movw	r24, r0
+ 34c:	a3 9f       	mul	r26, r19
+ 34e:	70 0d       	add	r23, r0
+ 350:	81 1d       	adc	r24, r1
+ 352:	11 24       	eor	r1, r1
+ 354:	91 1d       	adc	r25, r1
+ 356:	b2 9f       	mul	r27, r18
+ 358:	70 0d       	add	r23, r0
+ 35a:	81 1d       	adc	r24, r1
+ 35c:	11 24       	eor	r1, r1
+ 35e:	91 1d       	adc	r25, r1
+ 360:	08 95       	ret
+
+00000362 <_exit>:
+ 362:	f8 94       	cli
+
+00000364 <__stop_program>:
+ 364:	ff cf       	rjmp	.-2      	; 0x364 <__stop_program>

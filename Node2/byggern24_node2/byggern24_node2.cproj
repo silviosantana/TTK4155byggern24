@@ -42,9 +42,9 @@
     <com_atmel_avrdbg_tool_atmelice>
       <ToolOptions>
         <InterfaceProperties>
-          <IspClock>125000</IspClock>
+          <JtagDbgClock>200000</JtagDbgClock>
         </InterfaceProperties>
-        <InterfaceName>ISP</InterfaceName>
+        <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
       <ToolNumber>J41800001171</ToolNumber>
@@ -164,6 +164,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="game.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MCP2515.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">

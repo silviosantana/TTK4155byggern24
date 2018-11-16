@@ -10,6 +10,4 @@ void SRAM_write(uint16_t address, uint8_t data);
 uint8_t SRAM_read(uint16_t address);
 void SRAM_test();
 
-
-
-#endif 
+#endif // SRAM_DRIVER_H_

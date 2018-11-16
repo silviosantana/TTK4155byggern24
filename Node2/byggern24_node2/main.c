@@ -1,7 +1,6 @@
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <util/delay.h>
-
+#include "avr/io.h"
+#include "avr/interrupt.h"
+#include "util/delay.h"
 #include "util.h"
 #include "usart_driver.h"
 #include "can_controller_driver.h"
@@ -14,22 +13,20 @@
 #include "motor_driver.h";
 #include "motor_controller.h"
 
-
-
 int main(void)
 {
+	// Initializations
 	cli();
 	USART_Init(MYUBRR);
 	spi_init();
-	
 	timer_driver_init();
 	adc_init();
 	dac_init();
 	motor_init();
-	game_init();
-	motor_controller_init();
 	can_controller_init();
 	can_init();
+	game_init();
+	motor_controller_init();
 	sei();
 	
 	printf("Hello from node 2!\n\r");
@@ -39,11 +36,10 @@ int main(void)
 	
 	while (1)
 	{
-		//printf("inside while \n\r");
 		score = record_score(score);
 		//printf("ADC read: %d\t Score: %d\n\r", adc_read(0), score);
+		
 		//motor_driver_test();
-		//printf("after score \n\r");
 		//value = value + 1;
  		//dac_driver_send(value);
  		//printf("%d\n\r", value);

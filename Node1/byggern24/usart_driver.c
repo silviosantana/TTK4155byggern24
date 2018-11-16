@@ -1,5 +1,7 @@
 #include "usart_driver.h"
 
+#include <stdio.h>
+
 #include "avr/io.h"
 
 void USART_Init(unsigned int ubrr)
@@ -32,4 +34,12 @@ unsigned char USART_Receive(void)
 	;
 	/* Get and return received data from buffer */
 	return UDR0;
+}
+
+void USART_test_transmit_receive()
+{
+	unsigned char test;
+	printf("Your voice is my command");
+	test = USART_Receive();
+	USART_Transmit(test);
 }

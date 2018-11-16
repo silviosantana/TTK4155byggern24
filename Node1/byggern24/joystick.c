@@ -1,7 +1,8 @@
 #include "joystick.h"
 
-#include "avr/io.h"
 #include "util.h"
+#include "avr/io.h"
+#include "util/delay.h"
 #include "adc_driver.h"
 
 static int x_middle_pos;
@@ -78,4 +79,21 @@ int get_joystick_left_button()
 	uint8_t push = (PINB & 0b00000010);
 	
 	return push;
+}
+
+void joystick_test()
+{
+	struct Position j_pos;
+	uint8_t sliderL;
+	uint8_t sliderR = 0;
+	
+	while(1)
+	{
+		_delay_ms(500);
+		j_pos = get_joystick_position();
+		sliderL = get_left_slider();
+		sliderR = get_right_slider();
+		enum direction dir = get_joystick_direction();
+		printf("\r\nX: %d\t|\tY: %d\t|\tSL: %d\t|\tSR: %d |\tdir: %d", j_pos.x, j_pos.y, sliderL, sliderR, dir);
+	}
 }

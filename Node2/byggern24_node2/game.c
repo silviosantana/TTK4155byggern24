@@ -1,8 +1,7 @@
 #include "game.h"
 
-#include <avr/io.h>
+#include "avr/io.h"
 #include "util/delay.h"
-
 #include "util.h"
 #include "adc_driver.h"
 #include "motor_controller.h"

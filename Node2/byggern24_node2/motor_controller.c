@@ -16,15 +16,15 @@ int max_motor_pos, min_motor_pos;
 
 void motor_controller_calibration()
 {
-	motor_move(RIGHT, 200);
-	_delay_ms(1000);
+	motor_move(RIGHT, 100);
+	_delay_ms(2000);
 	motor_reset_encoder();
-	motor_move(LEFT, 200);
-	_delay_ms(1000);
+	motor_move(LEFT, 100);
+	_delay_ms(2000);
 	max_motor_pos = motor_get_encoder();
 	max_motor_pos -= 300;
-	motor_move(RIGHT, 200);
-	_delay_ms(1000);
+	motor_move(RIGHT, 100);
+	_delay_ms(2000);
 	motor_move(RIGHT, 0);
 
  	min_motor_pos = 500;

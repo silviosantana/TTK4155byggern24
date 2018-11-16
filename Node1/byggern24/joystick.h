@@ -8,8 +8,9 @@ int get_left_slider();
 int get_right_slider();
 int get_joystick_right_button();
 int get_joystick_left_button();
+void joystick_test();
 
 static int x_middle_pos;
 static int y_middle_pos;
 
-#endif
+#endif // JOYSTICK_H_

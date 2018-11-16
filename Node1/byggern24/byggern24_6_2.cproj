@@ -115,6 +115,15 @@
     <Compile Include="adc_driver.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="game.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="game.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MCP2515.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="can_controller_driver.c">
       <SubType>compile</SubType>
     </Compile>

@@ -1,8 +1,10 @@
-#include <stdint.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include "TWI_Master.h"
+#include "dac_driver.h"
 
+#include <stdint.h>
+
+#include "avr/interrupt.h"
+#include "avr/io.h"
+#include "TWI_Master.h"
 #include "util/delay.h"
 #include "util.h"
 

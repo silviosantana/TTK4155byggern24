@@ -1,6 +1,8 @@
-#include "util.h"
-#include <avr/io.h>
+#include "timer_driver.h"
+
+#include "avr/io.h"
 #include "avr/interrupt.h"
+#include "util.h"
 
 void timer_driver_init()
 {

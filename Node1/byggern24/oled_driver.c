@@ -1,10 +1,12 @@
 #include "oled_driver.h"
 
-#include "avr/io.h"
-#include "util/delay.h"
-#include "string.h"
-#include "fonts.h"
+#include <string.h>
 
+#include "util.h"
+#include "util/delay.h"
+#include "avr/io.h"
+#include "fonts.h"
+#include "joystick.h"
 
 void oled_init()
 {
@@ -32,13 +34,11 @@ void oled_init()
 	oled_write_cmd(0xaf);		//display on
 }
 
-
 void oled_write_data(unsigned char ins_d)
 {
 	volatile char *ext_oled = (char *) OLED_DATA_MEM; // OLED Data
 	ext_oled[0] = ins_d;
 }
-
 
 void oled_write_cmd(unsigned char ins_c)
 {
@@ -55,13 +55,6 @@ void oled_reset()
 	{
 		oled_write_data(0x00);
 	}
-	
-}
-
-
-void oled_home()
-{
-	
 }
 
 //go to specific page of OLED (0 - 7)
@@ -80,7 +73,6 @@ void oled_goto_column(uint8_t column)
 	oled_write_cmd(127);
 }
 
-
 //clear all columns of specific page (0 - 7)
 void oled_clear_line(uint8_t line)
 {
@@ -91,13 +83,12 @@ void oled_clear_line(uint8_t line)
 	}
 }
 
-//got to page and column (0 - 7 | 0 - 127)
+//go to page and column (0 - 7 | 0 - 127)
 void oled_pos(uint8_t row,uint8_t column)
 {
 	oled_goto_line(row);
 	oled_goto_column(column);
 }
-
 
 void oled_print_arrow(uint8_t row, uint8_t col)
 {
@@ -152,7 +143,6 @@ void oled_print_char(char character, int size)
 	
 }
 
-
 void oled_print_special_char (int code)
 {
 	char mychar;
@@ -164,91 +154,8 @@ void oled_print_special_char (int code)
 	}
 }
 
-//set state of menu
-menu* state_machine(menu* current_state, int* arrow_max, int arrow_pos)
-{
-	oled_reset();
-	//printf("current val: %d", current_state->val);
-	
-	if (current_state->val == 1)
-	{
-		//printf("%s", current_state->children[0]->name);
-		oled_pos(arrow_pos,100);
-		oled_print_special_char(5);
-		oled_pos(0,0);
-		oled_print(current_state->name, 3);
-		oled_pos(2,0);
-		oled_print(current_state->children[0]->name, 2);
-		oled_pos(3,0);
-		oled_print(current_state->children[1]->name, 2);
-		oled_pos(4,0);
-		oled_print(current_state->children[2]->name, 2);
-		*arrow_max = 4;
-	}
-	
-	else if (current_state->val == 2)
-	{
-		//printf("parent val: %d", current_state->parent->val);
-		oled_pos(0,0);
-		oled_print(current_state->name, 3);
-	}
-	
-	else if (current_state->val == 3)
-	{
-		oled_pos(0,0);
-		oled_print(current_state->name, 3);
-	}
-	
-	else if (current_state->val == 4)
-	{
-		oled_pos(0,0);
-		oled_print(current_state->name, 3);
-	}
-	return current_state;
-}
-
-//move menu arrow to navigate among menu levels
-menu* move_arrow(int dir, menu* current_state, int* arrow_max, int* arrow_pos)
-{
-	if (dir == 1) // left
-	{
-		printf("%s\n\r", current_state->name);
-		current_state = state_machine(current_state->parent, *arrow_max, *arrow_pos);
-	}
-	else if (dir == 2) // right
-	{
-		printf("%s\n\r", current_state->name);
-		current_state = state_machine(current_state->children[*arrow_pos - 2], *arrow_max, *arrow_pos);
-	}
-	else if (dir == 3) // up
-	{
-		oled_pos(*arrow_pos,100);
-		oled_print(" ", 3);
-		(*arrow_pos)--;
-		if (*arrow_pos == 1)
-		{
-			*arrow_pos = *arrow_max;
-		}
-		oled_pos(*arrow_pos,100);
-		oled_print_special_char(5);
-	}
-	else if (dir == 4) // down
-	{
-		oled_pos(*arrow_pos,100);
-		oled_print(" ", 3);
-		(*arrow_pos)++;
-		if (*arrow_pos == *arrow_max + 1)
-		{
-			*arrow_pos = 2;
-		}
-		oled_pos(*arrow_pos,100);
-		oled_print_special_char(5);
-	}
-	return current_state;
-}
-
 //write a specific pixel on (x,y)
-void write_pixel(int x, int y)
+void oled_write_pixel(int x, int y)
 {
 	int page = y / 8;
 	int page_y = 8 - (y % 8);
@@ -344,11 +251,11 @@ void oled_animate_mario_large()
 	int clm = 0;
 	int i, j;
 	
-	oled_reset();
+	//oled_reset();
 	for (i = 0; i < 5; i++)
 	{
 		oled_print_mario_large(i,0);
-		_delay_ms(1000);
+		_delay_ms(400);
 		oled_reset();
 	}
 	i--;
@@ -356,8 +263,7 @@ void oled_animate_mario_large()
 	{
 		oled_reset();
 		oled_print_mario_large(i,j);
-		_delay_ms(500);
-		
+		_delay_ms(100);	
 	}	
 }
 
@@ -385,32 +291,8 @@ void oled_print_mario_large(uint8_t row,uint8_t column)
 	oled_print_special_char(25);
 }
 
-void oled_print_ntnu_logo(uint8_t row, uint8_t column)
+void oled_test()
 {
-	oled_pos(row, column);
-	oled_print_special_char(26);
-	oled_print_special_char(27);
-	oled_print_special_char(28);
-	oled_print_special_char(29);
-	oled_pos(row + 1, column);
-	oled_print_special_char(30);
-	oled_print_special_char(31);
-	oled_print_special_char(32);
-	oled_print_special_char(33);
-	oled_pos(row + 2, column);
-	oled_print_special_char(34);
-	oled_print_special_char(35);
-	oled_print_special_char(36);
-	oled_print_special_char(37);
-	oled_pos(row + 3, column);
-	oled_print_special_char(38);
-	oled_print_special_char(39);
-	oled_print_special_char(40);
-	oled_print_special_char(41);
-	}
-
-void oled_test(){
-
 	oled_reset();
 	/*oled_write_cmd(0x22);
 	oled_write_cmd(0x00);
@@ -418,12 +300,121 @@ void oled_test(){
 
 	//oled_print_arrow(2, 64);
 	oled_animate_mario_large();
-	oled_print_ntnu_logo();
+
 	//oled_line(65, 63, 26, 12);
 	//oled_circle(80,30,21);
 	
 	//oled_clear_line(6);
 	//oled_write_cmd(0x40);
+}
 
+void oled_print_ntnu_logo(uint8_t row, uint8_t column)
+{
+	oled_print_1st_part_ntnu_logo(row, column);
+	oled_print_2nd_part_ntnu_logo(row + 1, column);
+	oled_print_3rd_part_ntnu_logo(row + 2, column);
+	oled_print_4th_part_ntnu_logo(row + 3, column);	
+}
+
+void oled_print_4th_part_ntnu_logo(uint8_t row, uint8_t column)
+{
+	oled_pos(row, column);
+	oled_print_special_char(38);
+	oled_print_special_char(39);
+	oled_print_special_char(40);
+	oled_print_special_char(41);
+}
+
+void oled_print_3rd_part_ntnu_logo(uint8_t row, uint8_t column)
+{
+	oled_pos(row, column);
+	oled_print_special_char(34);
+	oled_print_special_char(35);
+	oled_print_special_char(36);
+	oled_print_special_char(37);
+}
+
+void oled_print_2nd_part_ntnu_logo(uint8_t row, uint8_t column)
+{
+	oled_pos(row, column);
+	oled_print_special_char(30);
+	oled_print_special_char(31);
+	oled_print_special_char(32);
+	oled_print_special_char(33);
+}
+
+void oled_print_1st_part_ntnu_logo(uint8_t row, uint8_t column)
+{
+	oled_pos(row, column);
+	oled_print_special_char(26);
+	oled_print_special_char(27);
+	oled_print_special_char(28);
+	oled_print_special_char(29);
+}
+
+void oled_animate_ntnu()
+{
+	int row = 0, column = 0;
 	
+	oled_reset();
+	oled_print_4th_part_ntnu_logo(row, column);
+	_delay_ms(200);
+	
+	oled_reset();
+	oled_print_3rd_part_ntnu_logo(row, column);
+	oled_print_4th_part_ntnu_logo(row + 1, column);
+	_delay_ms(200);
+	
+	oled_reset();
+	oled_print_2nd_part_ntnu_logo(row, column);
+	oled_print_3rd_part_ntnu_logo(row + 1, column);
+	oled_print_4th_part_ntnu_logo(row + 2, column);
+	_delay_ms(200);
+	
+	oled_reset();
+	oled_print_ntnu_logo(row, column);
+	_delay_ms(800);
+	
+	
+	row = 5;
+	oled_pos(row, column);
+	oled_print("NTNU", 3);
+	_delay_ms(800);
+	
+	row = 4;
+	column = 40;
+	oled_pos(row, column);
+	oled_print("CHALLENGE", 3);
+	row = 5;
+	oled_pos(row, column);
+	oled_print("THE OCEAN", 3);
+	_delay_ms(800);
+	oled_pos(row, column);
+	oled_print("POLLUTION", 3);
+	_delay_ms(800);
+	oled_pos(row, column);
+	oled_print("PING PONG", 3);
+	_delay_ms(1000);
+	
+	row = 1;
+	column = 40;
+	oled_pos(row, column);
+	oled_print("?", 3);
+	_delay_ms(10);
+	column = 48;
+	oled_print("?", 3);
+	_delay_ms(10);
+	column = 54;
+	oled_print("?", 3);
+	_delay_ms(10);
+}
+
+void oled_ingame_display(int score)
+{
+	oled_reset();
+	int row = 2, column = 8;
+	char text[10];
+	sprintf(text, "SCORE %d\0", score);
+	oled_pos(row, column);
+	oled_print(text, 3);
 }

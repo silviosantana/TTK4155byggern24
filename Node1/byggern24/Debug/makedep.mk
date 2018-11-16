@@ -4,6 +4,8 @@
 
 adc_driver.c
 
+game.c
+
 can_controller_driver.c
 
 can_driver.c

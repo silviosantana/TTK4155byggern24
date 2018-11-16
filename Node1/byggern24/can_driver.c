@@ -2,12 +2,13 @@
 
 #include <stdint.h>
 
+#include "util.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 #include "util/delay.h"
-#include "util.h"
 #include "can_controller_driver.h"
-
+#include "MCP2515.h"
+#include "game.h"
 
 ISR(INT1_vect)
 {
@@ -21,11 +22,13 @@ ISR(INT1_vect)
 	{
 		can_recieve_msg(0, msg);
 		
-		printf("DATA ON RX0:\n\r");
-		for (uint8_t byte = 0; byte < msg->length; byte++) {
-			printf("%d \n\r", msg->data[byte]);
-		}
-		
+// 		printf("DATA ON RX0:\n\r");
+// 		for (uint8_t byte = 0; byte < msg->length; byte++) {
+// 			printf("%d \n\r", msg->data[byte]);
+// 		}
+
+		int score = (int) msg->data[0];
+		oled_ingame_display(score);
 	}else if ((canInt & MCP_RX1IF) == MCP_RX1IF)
 	{
 		can_recieve_msg(1, msg);
@@ -44,11 +47,11 @@ ISR(INT1_vect)
 		sei();
 		return;
 	}
-	printf("before:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
+	//printf("before:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
 	can_controller_write(MCP_CANINTF, 0x00);
 	//can_controller_write(MCP_EFLG, 0x00);
-	printf("aftah:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
-	printf("===========================================\n\r");
+	//printf("aftah:MCP_EFLG=%2x\tMCPEFLG\tMCP_CANINTF=%2x\t\n\r",can_controller_read(MCP_EFLG), can_controller_read(MCP_CANINTF));
+	//printf("===========================================\n\r");
 	free(msg);
 	can_controller_write(MCP_CANINTF, 0x00);
 	sei();

@@ -3,4 +3,4 @@
 
 unsigned int ADC_read (unsigned int chn);
 
-#endif
+#endif // ADC_DRIVER_H_

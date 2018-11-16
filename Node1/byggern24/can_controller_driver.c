@@ -2,10 +2,11 @@
 
 #include <stdint.h>
 
+#include "util.h"
 #include "avr/io.h"
 #include "util/delay.h"
 #include "spi_driver.h"
-#include "util.h"
+#include "MCP2515.h"
 
 #define CAN_CS PB4
 
@@ -20,12 +21,10 @@ void can_controller_reset()
 uint8_t can_controller_init()
 {
     uint8_t value;
-	
 
     //spi_init(); // Initialize SPI
     can_controller_reset(); // Send reset-command
 	
-
     // Self-test
     value = can_controller_read(MCP_CANSTAT);
     if ((value & MODE_MASK)  != MODE_CONFIG) 
@@ -173,6 +172,5 @@ void can_controller_load_data_to_buffer(uint8_t buffer, uint8_t* data)
 
 void can_controller_test()
 {
-
 	printf("mode value: %d", can_controller_set_mode(MODE_LOOPBACK));
 }

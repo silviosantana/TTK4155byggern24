@@ -36,4 +36,4 @@ typedef struct {
 	uint8_t data[8];
 } can_message;
 
-#endif 
+#endif // UTIL_H_
