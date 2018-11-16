@@ -9,7 +9,7 @@
 int game_mode;
 
 void game_init(){
-	game_mode = 1;
+	game_mode = 0;
 }
 
 void game_toggle_mode()

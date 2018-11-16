@@ -21,11 +21,8 @@ void can_controller_reset()
 uint8_t can_controller_init()
 {
 	uint8_t value;
-
-	//spi_init(); // Initialize SPI
 	can_controller_reset(); // Send reset-command
 	
-
 	// Self-test
 	value = can_controller_read(MCP_CANSTAT);
 	if ((value & MODE_MASK)  != MODE_CONFIG)

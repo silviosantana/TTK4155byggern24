@@ -1043,31 +1043,31 @@ END GROUP
  .debug_frame   0x000005a8       0xb8 TWI_Master.o
  .debug_frame   0x00000660       0x44 usart_driver.o
 
-.debug_str      0x00000000      0x8f4
+.debug_str      0x00000000      0x8bd
  *(.debug_str)
  .debug_str     0x00000000      0x18d adc_driver.o
                                 0x1c6 (size before relaxing)
  .debug_str     0x0000018d      0x1b8 can_controller_driver.o
                                 0x354 (size before relaxing)
- .debug_str     0x00000345      0x148 can_driver.o
-                                0x341 (size before relaxing)
- .debug_str     0x0000048d       0x66 dac_driver.o
+ .debug_str     0x00000345      0x111 can_driver.o
+                                0x372 (size before relaxing)
+ .debug_str     0x00000456       0x66 dac_driver.o
                                 0x1ed (size before relaxing)
- .debug_str     0x000004f3       0x3c game.o
+ .debug_str     0x000004bc       0x3c game.o
                                 0x240 (size before relaxing)
- .debug_str     0x0000052f       0x58 main.o
+ .debug_str     0x000004f8       0x58 main.o
                                 0x281 (size before relaxing)
- .debug_str     0x00000587      0x13e motor_controller.o
+ .debug_str     0x00000550      0x13e motor_controller.o
                                 0x369 (size before relaxing)
- .debug_str     0x000006c5       0x82 motor_driver.o
+ .debug_str     0x0000068e       0x82 motor_driver.o
                                 0x305 (size before relaxing)
- .debug_str     0x00000747       0x34 spi_driver.o
+ .debug_str     0x00000710       0x34 spi_driver.o
                                 0x1d6 (size before relaxing)
- .debug_str     0x0000077b       0x1d timer_driver.o
+ .debug_str     0x00000744       0x1d timer_driver.o
                                 0x1e8 (size before relaxing)
- .debug_str     0x00000798      0x11d TWI_Master.o
+ .debug_str     0x00000761      0x11d TWI_Master.o
                                 0x270 (size before relaxing)
- .debug_str     0x000008b5       0x3f usart_driver.o
+ .debug_str     0x0000087e       0x3f usart_driver.o
                                 0x1c3 (size before relaxing)
 
 .debug_loc      0x00000000     0x12aa

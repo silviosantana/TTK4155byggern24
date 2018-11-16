@@ -21,11 +21,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   8 .debug_frame  000006a4  00000000  00000000  00006f2c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000008f4  00000000  00000000  000075d0  2**0
+  9 .debug_str    000008bd  00000000  00000000  000075d0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000012aa  00000000  00000000  00007ec4  2**0
+ 10 .debug_loc    000012aa  00000000  00000000  00007e8d  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000230  00000000  00000000  0000916e  2**0
+ 11 .debug_ranges 00000230  00000000  00000000  00009137  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -272,17 +272,29 @@ Disassembly of section .text:
      1c6:	1c cf       	rjmp	.-456    	; 0x0 <__vectors>
 
 000001c8 <adc_init>:
+
+void adc_init ()
+{
+	// AREF = AVcc
+
+	set_bit(ADMUX, REFS0);
      1c8:	ec e7       	ldi	r30, 0x7C	; 124
      1ca:	f0 e0       	ldi	r31, 0x00	; 0
      1cc:	80 81       	ld	r24, Z
      1ce:	80 64       	ori	r24, 0x40	; 64
      1d0:	80 83       	st	Z, r24
+	clear_bit(ADMUX, REFS1);
      1d2:	80 81       	ld	r24, Z
      1d4:	8f 77       	andi	r24, 0x7F	; 127
      1d6:	80 83       	st	Z, r24
+	clear_bit(ADMUX, ADLAR);
      1d8:	80 81       	ld	r24, Z
      1da:	8f 7d       	andi	r24, 0xDF	; 223
      1dc:	80 83       	st	Z, r24
+	
+	// ADC Enable and prescaler of 128
+	// 16000000/128 = 125000
+	ADCSRA |= (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0);
      1de:	ea e7       	ldi	r30, 0x7A	; 122
      1e0:	f0 e0       	ldi	r31, 0x00	; 0
      1e2:	80 81       	ld	r24, Z
@@ -291,26 +303,58 @@ Disassembly of section .text:
      1e8:	08 95       	ret
 
 000001ea <adc_read>:
+
+// read adc value
+uint16_t adc_read(uint8_t ch)
+{
+	 ch &= 0b00000111;  // AND operation with 7
+	 ADMUX = (ADMUX & 0xF8)|ch; // clears the bottom 3 bits before ORing
      1ea:	ec e7       	ldi	r30, 0x7C	; 124
      1ec:	f0 e0       	ldi	r31, 0x00	; 0
      1ee:	90 81       	ld	r25, Z
+}
+
+// read adc value
+uint16_t adc_read(uint8_t ch)
+{
+	 ch &= 0b00000111;  // AND operation with 7
      1f0:	87 70       	andi	r24, 0x07	; 7
+	 ADMUX = (ADMUX & 0xF8)|ch; // clears the bottom 3 bits before ORing
      1f2:	98 7f       	andi	r25, 0xF8	; 248
      1f4:	98 2b       	or	r25, r24
      1f6:	90 83       	st	Z, r25
+	
+	// start single conversion
+	// write '1' to ADSC
+	set_bit(ADCSRA, ADSC);
      1f8:	ea e7       	ldi	r30, 0x7A	; 122
      1fa:	f0 e0       	ldi	r31, 0x00	; 0
      1fc:	80 81       	ld	r24, Z
      1fe:	80 64       	ori	r24, 0x40	; 64
      200:	80 83       	st	Z, r24
+	
+	// wait for conversion to complete
+	// ADSC becomes '0' again
+	// till then, run loop continuously
+	//while(ADCSRA & (1<<ADSC));
+	loop_until_bit_is_clear( ADCSRA, ADSC );
      202:	80 81       	ld	r24, Z
      204:	86 fd       	sbrc	r24, 6
      206:	fd cf       	rjmp	.-6      	; 0x202 <adc_read+0x18>
+	
+	return (ADC);
      208:	80 91 78 00 	lds	r24, 0x0078
      20c:	90 91 79 00 	lds	r25, 0x0079
+}
      210:	08 95       	ret
 
 00000212 <can_controller_reset>:
+	status = spi_read();
+
+	PORTB |= ~(1<<CAN_CS);
+
+	return status;
+}
      212:	2f 98       	cbi	0x05, 7	; 5
      214:	80 ec       	ldi	r24, 0xC0	; 192
      216:	e4 d3       	rcall	.+1992   	; 0x9e0 <spi_send>
@@ -369,30 +413,54 @@ Disassembly of section .text:
      274:	08 95       	ret
 
 00000276 <can_controller_write>:
+
+void can_controller_write(uint8_t address, uint8_t data)
+{
      276:	cf 93       	push	r28
      278:	df 93       	push	r29
      27a:	d8 2f       	mov	r29, r24
      27c:	c6 2f       	mov	r28, r22
+	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
      27e:	2f 98       	cbi	0x05, 7	; 5
+	
+	spi_send(MCP_WRITE);
      280:	82 e0       	ldi	r24, 0x02	; 2
      282:	ae d3       	rcall	.+1884   	; 0x9e0 <spi_send>
+	spi_send(address);
      284:	8d 2f       	mov	r24, r29
      286:	ac d3       	rcall	.+1880   	; 0x9e0 <spi_send>
+	spi_send(data);
      288:	8c 2f       	mov	r24, r28
      28a:	aa d3       	rcall	.+1876   	; 0x9e0 <spi_send>
+
+	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
      28c:	2f 9a       	sbi	0x05, 7	; 5
+}
      28e:	df 91       	pop	r29
      290:	cf 91       	pop	r28
      292:	08 95       	ret
 
 00000294 <can_controller_init>:
+uint8_t can_controller_init()
+{
+	uint8_t value;
+
+	//spi_init(); // Initialize SPI
+	can_controller_reset(); // Send reset-command
      294:	be df       	rcall	.-132    	; 0x212 <can_controller_reset>
+	
+
+	// Self-test
+	value = can_controller_read(MCP_CANSTAT);
      296:	8e e0       	ldi	r24, 0x0E	; 14
      298:	c7 df       	rcall	.-114    	; 0x228 <can_controller_read>
+	if ((value & MODE_MASK)  != MODE_CONFIG)
      29a:	98 2f       	mov	r25, r24
      29c:	90 7e       	andi	r25, 0xE0	; 224
      29e:	90 38       	cpi	r25, 0x80	; 128
      2a0:	71 f0       	breq	.+28     	; 0x2be <can_controller_init+0x2a>
+	{
+		printf("%d can_controller is NOT in configuration mode after reset!\n\r", value);
      2a2:	1f 92       	push	r1
      2a4:	8f 93       	push	r24
      2a6:	87 e0       	ldi	r24, 0x07	; 7
@@ -400,28 +468,45 @@ Disassembly of section .text:
      2aa:	9f 93       	push	r25
      2ac:	8f 93       	push	r24
      2ae:	0e 94 9d 09 	call	0x133a	; 0x133a <printf>
+		return 1;
      2b2:	0f 90       	pop	r0
      2b4:	0f 90       	pop	r0
      2b6:	0f 90       	pop	r0
      2b8:	0f 90       	pop	r0
      2ba:	81 e0       	ldi	r24, 0x01	; 1
      2bc:	08 95       	ret
+	}
+	
+	//printf("mode value: %d\n\r", (value & MODE_MASK));
+	
+	//turn RXM1 and RXM0 to 11 to turn off filters and receive any messages
+	can_controller_bit_modify(MCP_CANINTE, 0b11111111, 0b00000001);
      2be:	41 e0       	ldi	r20, 0x01	; 1
      2c0:	6f ef       	ldi	r22, 0xFF	; 255
      2c2:	8b e2       	ldi	r24, 0x2B	; 43
      2c4:	bc df       	rcall	.-136    	; 0x23e <can_controller_bit_modify>
+	can_controller_bit_modify(MCP_RXB0CTRL, 0b01100100, 0b01100100);
      2c6:	44 e6       	ldi	r20, 0x64	; 100
      2c8:	64 e6       	ldi	r22, 0x64	; 100
      2ca:	80 e6       	ldi	r24, 0x60	; 96
      2cc:	b8 df       	rcall	.-144    	; 0x23e <can_controller_bit_modify>
+	//printf("RBX0CTRL: %02x\n\r", can_controller_read(MCP_RXB0CTRL));
+	can_controller_bit_modify(MCP_RXB1CTRL, 0b01100000, 0b01100000);
      2ce:	40 e6       	ldi	r20, 0x60	; 96
      2d0:	60 e6       	ldi	r22, 0x60	; 96
      2d2:	80 e7       	ldi	r24, 0x70	; 112
      2d4:	b4 df       	rcall	.-152    	; 0x23e <can_controller_bit_modify>
+	//printf("RBX1CTRL: %02x\n\r", can_controller_read(MCP_RXB1CTRL));
+
+	
+	//Set lower ID reg to zero
+	can_controller_write(MCP_TXB0SIDL, 0x00);
      2d6:	60 e0       	ldi	r22, 0x00	; 0
      2d8:	82 e3       	ldi	r24, 0x32	; 50
      2da:	cd df       	rcall	.-102    	; 0x276 <can_controller_write>
+	return 0;
      2dc:	80 e0       	ldi	r24, 0x00	; 0
+}
      2de:	08 95       	ret
 
 000002e0 <can_init>:
@@ -685,25 +770,56 @@ ISR(INT4_vect)
      41e:	18 95       	reti
 
 00000420 <dac_init>:
+
+void dac_init()
+{
+	//reset ADC and put it to normal mode
+	//uint8_t cmd = 0b00010000;
+	TWI_Master_Initialise();
      420:	29 d3       	rcall	.+1618   	; 0xa74 <TWI_Master_Initialise>
+	//sei();
+	//set SCL and SDA as outputs
+ 	set_bit(DDRD, PD0);
      422:	50 9a       	sbi	0x0a, 0	; 10
+ 	set_bit(DDRD, PD1);	
      424:	51 9a       	sbi	0x0a, 1	; 10
      426:	08 95       	ret
 
 00000428 <dac_driver_send>:
+	//dac_driver_send(cmd, 0, 0);
+}
+
+void dac_driver_send(uint8_t data)
+{
      428:	cf 93       	push	r28
      42a:	df 93       	push	r29
      42c:	00 d0       	rcall	.+0      	; 0x42e <dac_driver_send+0x6>
      42e:	cd b7       	in	r28, 0x3d	; 61
      430:	de b7       	in	r29, 0x3e	; 62
+	//DAC address + rd/!wr 01010000;
+	uint8_t addr = 0x50;
+	uint8_t msg[3];
+	
+	msg[0] = addr;
      432:	90 e5       	ldi	r25, 0x50	; 80
      434:	99 83       	std	Y+1, r25	; 0x01
+	msg[1] = 0x00;
      436:	1a 82       	std	Y+2, r1	; 0x02
+	msg[2] = data;
      438:	8b 83       	std	Y+3, r24	; 0x03
+	
+	
+	TWI_Start_Transceiver_With_Data( msg, 3);
      43a:	63 e0       	ldi	r22, 0x03	; 3
      43c:	ce 01       	movw	r24, r28
      43e:	01 96       	adiw	r24, 0x01	; 1
      440:	23 d3       	rcall	.+1606   	; 0xa88 <TWI_Start_Transceiver_With_Data>
+// 	}else
+// 	{
+// 		TWI_Start_Transceiver_With_Data( msg, 2);
+// 	}
+
+}
      442:	0f 90       	pop	r0
      444:	0f 90       	pop	r0
      446:	0f 90       	pop	r0
@@ -712,6 +828,12 @@ ISR(INT4_vect)
      44c:	08 95       	ret
 
 0000044e <game_init>:
+#include "motor_controller.h"
+
+int game_mode;
+
+void game_init(){
+	game_mode = 1;
      44e:	81 e0       	ldi	r24, 0x01	; 1
      450:	90 e0       	ldi	r25, 0x00	; 0
      452:	90 93 b4 02 	sts	0x02B4, r25
@@ -719,13 +841,25 @@ ISR(INT4_vect)
      45a:	08 95       	ret
 
 0000045c <game_toggle_mode>:
+}
+
+void game_toggle_mode()
+{
+	if (game_mode == 1)
      45c:	80 91 b3 02 	lds	r24, 0x02B3
      460:	90 91 b4 02 	lds	r25, 0x02B4
      464:	01 97       	sbiw	r24, 0x01	; 1
      466:	29 f4       	brne	.+10     	; 0x472 <game_toggle_mode+0x16>
+	{
+		game_mode = 0;
      468:	10 92 b4 02 	sts	0x02B4, r1
      46c:	10 92 b3 02 	sts	0x02B3, r1
      470:	08 95       	ret
+		//printf("1 -> 0\n\r");
+		//motor_controller_deactivate();
+	}else
+	{
+		game_mode = 1;
      472:	81 e0       	ldi	r24, 0x01	; 1
      474:	90 e0       	ldi	r25, 0x00	; 0
      476:	90 93 b4 02 	sts	0x02B4, r25
@@ -733,19 +867,34 @@ ISR(INT4_vect)
      47e:	08 95       	ret
 
 00000480 <game_get_mode>:
+}
+
+int game_get_mode()
+{
+	return game_mode;
+}
      480:	80 91 b3 02 	lds	r24, 0x02B3
      484:	90 91 b4 02 	lds	r25, 0x02B4
      488:	08 95       	ret
 
 0000048a <record_score>:
+
+uint16_t record_score(uint16_t score)
+{
      48a:	cf 93       	push	r28
      48c:	df 93       	push	r29
      48e:	ec 01       	movw	r28, r24
+	uint16_t score_interval = 0;
+	uint16_t adc = adc_read(0);
      490:	80 e0       	ldi	r24, 0x00	; 0
      492:	ab de       	rcall	.-682    	; 0x1ea <adc_read>
+		
+	if (adc < 300)
      494:	8c 32       	cpi	r24, 0x2C	; 44
      496:	91 40       	sbci	r25, 0x01	; 1
      498:	78 f4       	brcc	.+30     	; 0x4b8 <record_score+0x2e>
+	{
+		score += 1;
      49a:	21 96       	adiw	r28, 0x01	; 1
 	#else
 		//round up by default
@@ -762,31 +911,61 @@ ISR(INT4_vect)
      4a8:	e1 f7       	brne	.-8      	; 0x4a2 <record_score+0x18>
      4aa:	00 c0       	rjmp	.+0      	; 0x4ac <record_score+0x22>
      4ac:	00 00       	nop
+	}
+	
+		
+	while(score_interval == 1)
+	{
+		if (adc_read(0) > 300)
      4ae:	80 e0       	ldi	r24, 0x00	; 0
      4b0:	9c de       	rcall	.-712    	; 0x1ea <adc_read>
      4b2:	8d 32       	cpi	r24, 0x2D	; 45
      4b4:	91 40       	sbci	r25, 0x01	; 1
      4b6:	d8 f3       	brcs	.-10     	; 0x4ae <record_score+0x24>
+			score_interval = 0;
+			break;
+		}
+	}
+	return score;
      4b8:	ce 01       	movw	r24, r28
      4ba:	df 91       	pop	r29
      4bc:	cf 91       	pop	r28
      4be:	08 95       	ret
 
 000004c0 <main>:
+#include "motor_controller.h"
+
+int main(void)
+{
+	// Initializations
+	cli();
      4c0:	f8 94       	cli
+	USART_Init(MYUBRR);
      4c2:	87 e6       	ldi	r24, 0x67	; 103
      4c4:	90 e0       	ldi	r25, 0x00	; 0
      4c6:	95 d3       	rcall	.+1834   	; 0xbf2 <USART_Init>
+	spi_init();
      4c8:	84 d2       	rcall	.+1288   	; 0x9d2 <spi_init>
+	timer_driver_init();
      4ca:	90 d2       	rcall	.+1312   	; 0x9ec <timer_driver_init>
+	adc_init();
      4cc:	7d de       	rcall	.-774    	; 0x1c8 <adc_init>
+	dac_init();
      4ce:	a8 df       	rcall	.-176    	; 0x420 <dac_init>
+	motor_init();
      4d0:	d5 d1       	rcall	.+938    	; 0x87c <motor_init>
+	can_controller_init();
      4d2:	e0 de       	rcall	.-576    	; 0x294 <can_controller_init>
+	can_init();
      4d4:	05 df       	rcall	.-502    	; 0x2e0 <can_init>
+	game_init();
      4d6:	bb df       	rcall	.-138    	; 0x44e <game_init>
+	motor_controller_init();
      4d8:	4f d0       	rcall	.+158    	; 0x578 <motor_controller_init>
+	sei();
      4da:	78 94       	sei
+	
+	printf("Hello from node 2!\n\r");
      4dc:	86 e9       	ldi	r24, 0x96	; 150
      4de:	92 e0       	ldi	r25, 0x02	; 2
      4e0:	9f 93       	push	r25
@@ -794,8 +973,15 @@ ISR(INT4_vect)
      4e4:	2a d7       	rcall	.+3668   	; 0x133a <printf>
      4e6:	0f 90       	pop	r0
      4e8:	0f 90       	pop	r0
+	
+	uint16_t score = 0;
      4ea:	80 e0       	ldi	r24, 0x00	; 0
      4ec:	90 e0       	ldi	r25, 0x00	; 0
+	//uint16_t value = 0;
+	
+	while (1)
+	{
+		score = record_score(score);
      4ee:	cd df       	rcall	.-102    	; 0x48a <record_score>
      4f0:	2f ef       	ldi	r18, 0xFF	; 255
      4f2:	39 e6       	ldi	r19, 0x69	; 105
@@ -809,6 +995,12 @@ ISR(INT4_vect)
      502:	f5 cf       	rjmp	.-22     	; 0x4ee <main+0x2e>
 
 00000504 <motor_controller_calibration>:
+
+void motor_controller_deactivate()
+{
+	//cli();
+	// disable compare interrupt
+	clear_bit(TIMSK4, OCIE4A);
      504:	64 e6       	ldi	r22, 0x64	; 100
      506:	82 e0       	ldi	r24, 0x02	; 2
      508:	90 e0       	ldi	r25, 0x00	; 0
@@ -935,6 +1127,11 @@ ISR(INT4_vect)
      642:	08 95       	ret
 
 00000644 <motor_controller>:
+	//sei();
+}
+
+void motor_controller()
+{
      644:	8f 92       	push	r8
      646:	9f 92       	push	r9
      648:	af 92       	push	r10
@@ -945,11 +1142,19 @@ ISR(INT4_vect)
      652:	ff 92       	push	r15
      654:	cf 93       	push	r28
      656:	df 93       	push	r29
+	if (game_get_mode() == 1)
      658:	13 df       	rcall	.-474    	; 0x480 <game_get_mode>
      65a:	01 97       	sbiw	r24, 0x01	; 1
      65c:	09 f0       	breq	.+2      	; 0x660 <motor_controller+0x1c>
      65e:	c6 c0       	rjmp	.+396    	; 0x7ec <motor_controller+0x1a8>
+	{
+		enum direction target_dir;
+		uint8_t speed;
+		int motor_cur_pos = motor_get_encoder();
      660:	3f d1       	rcall	.+638    	; 0x8e0 <motor_get_encoder>
+		double derivative;
+		
+		int curr_pos = (int) 100.0*((double)(motor_cur_pos - min_motor_pos))/((double)(max_motor_pos - min_motor_pos));
      662:	a0 90 b9 02 	lds	r10, 0x02B9
      666:	b0 90 ba 02 	lds	r11, 0x02BA
      66a:	8a 19       	sub	r24, r10
@@ -982,6 +1187,8 @@ ISR(INT4_vect)
      6a4:	b6 01       	movw	r22, r12
      6a6:	1e d3       	rcall	.+1596   	; 0xce4 <__divsf3>
      6a8:	85 d3       	rcall	.+1802   	; 0xdb4 <__fixsfsi>
+		
+		error = (double)(set_point - curr_pos);
      6aa:	a0 90 bb 02 	lds	r10, 0x02BB
      6ae:	b0 90 bc 02 	lds	r11, 0x02BC
      6b2:	a6 1a       	sub	r10, r22
@@ -998,15 +1205,25 @@ ISR(INT4_vect)
      6ca:	70 93 c2 02 	sts	0x02C2, r23
      6ce:	80 93 c3 02 	sts	0x02C3, r24
      6d2:	90 93 c4 02 	sts	0x02C4, r25
+		
+		if (error < 0)
      6d6:	20 e0       	ldi	r18, 0x00	; 0
      6d8:	30 e0       	ldi	r19, 0x00	; 0
      6da:	a9 01       	movw	r20, r18
      6dc:	ff d2       	rcall	.+1534   	; 0xcdc <__cmpsf2>
+		{
+			target_dir = RIGHT;
+		}else
+		{
+			target_dir = LEFT;
      6de:	c8 2f       	mov	r28, r24
      6e0:	cc 1f       	adc	r28, r28
      6e2:	cc 27       	eor	r28, r28
      6e4:	cc 1f       	adc	r28, r28
      6e6:	cf 5f       	subi	r28, 0xFF	; 255
+		}
+		
+		integral = integral + error * dt;
      6e8:	20 91 c7 02 	lds	r18, 0x02C7
      6ec:	30 91 c8 02 	lds	r19, 0x02C8
      6f0:	40 91 c9 02 	lds	r20, 0x02C9
@@ -1025,6 +1242,9 @@ ISR(INT4_vect)
      718:	70 93 d0 02 	sts	0x02D0, r23
      71c:	80 93 d1 02 	sts	0x02D1, r24
      720:	90 93 d2 02 	sts	0x02D2, r25
+		derivative = (error - prev_error)/dt;
+
+		if (abs((int)error) < 6){
      724:	85 e0       	ldi	r24, 0x05	; 5
      726:	a8 0e       	add	r10, r24
      728:	b1 1c       	adc	r11, r1
@@ -1032,14 +1252,20 @@ ISR(INT4_vect)
      72c:	a8 16       	cp	r10, r24
      72e:	b1 04       	cpc	r11, r1
      730:	80 f4       	brcc	.+32     	; 0x752 <motor_controller+0x10e>
+			error = 0;
      732:	10 92 c1 02 	sts	0x02C1, r1
      736:	10 92 c2 02 	sts	0x02C2, r1
      73a:	10 92 c3 02 	sts	0x02C3, r1
      73e:	10 92 c4 02 	sts	0x02C4, r1
+			integral = 0;
      742:	10 92 cf 02 	sts	0x02CF, r1
      746:	10 92 d0 02 	sts	0x02D0, r1
      74a:	10 92 d1 02 	sts	0x02D1, r1
      74e:	10 92 d2 02 	sts	0x02D2, r1
+		}
+
+		//speed = abs((uint8_t) (kp*error + ki*integral + kd*derivative));
+		speed = (uint8_t) abs((int)(kp*error + ki*integral));
      752:	c0 90 c1 02 	lds	r12, 0x02C1
      756:	d0 90 c2 02 	lds	r13, 0x02C2
      75a:	e0 90 c3 02 	lds	r14, 0x02C3
@@ -1076,8 +1302,15 @@ ISR(INT4_vect)
      7b4:	26 1b       	sub	r18, r22
      7b6:	37 0b       	sbc	r19, r23
      7b8:	d2 2f       	mov	r29, r18
+		
+		if (speed > 150)
      7ba:	27 39       	cpi	r18, 0x97	; 151
      7bc:	40 f4       	brcc	.+16     	; 0x7ce <motor_controller+0x18a>
+		{
+			speed = 150;
+		}
+		
+		else if (speed < 55 && abs(error) > 5)
      7be:	27 33       	cpi	r18, 0x37	; 55
      7c0:	48 f4       	brcc	.+18     	; 0x7d4 <motor_controller+0x190>
      7c2:	c7 01       	movw	r24, r14
@@ -1086,17 +1319,37 @@ ISR(INT4_vect)
      7c8:	06 97       	sbiw	r24, 0x06	; 6
      7ca:	1c f4       	brge	.+6      	; 0x7d2 <motor_controller+0x18e>
      7cc:	03 c0       	rjmp	.+6      	; 0x7d4 <motor_controller+0x190>
+		//speed = abs((uint8_t) (kp*error + ki*integral + kd*derivative));
+		speed = (uint8_t) abs((int)(kp*error + ki*integral));
+		
+		if (speed > 150)
+		{
+			speed = 150;
      7ce:	d6 e9       	ldi	r29, 0x96	; 150
      7d0:	01 c0       	rjmp	.+2      	; 0x7d4 <motor_controller+0x190>
+		}
+		
+		else if (speed < 55 && abs(error) > 5)
+		{
+			speed = 55;
      7d2:	d7 e3       	ldi	r29, 0x37	; 55
+		}
+		//	printf("MAXP: %d | BCP: %d | CP: %d | SP: %d\n\r", max_motor_pos, motor_cur_pos, curr_pos, set_point );
+		
+		prev_error = error;
      7d4:	c0 92 cb 02 	sts	0x02CB, r12
      7d8:	d0 92 cc 02 	sts	0x02CC, r13
      7dc:	e0 92 cd 02 	sts	0x02CD, r14
      7e0:	f0 92 ce 02 	sts	0x02CE, r15
+		
+		motor_move(target_dir, speed);
      7e4:	6d 2f       	mov	r22, r29
      7e6:	8c 2f       	mov	r24, r28
      7e8:	90 e0       	ldi	r25, 0x00	; 0
      7ea:	c9 d0       	rcall	.+402    	; 0x97e <motor_move>
+	}
+	
+}
      7ec:	df 91       	pop	r29
      7ee:	cf 91       	pop	r28
      7f0:	ff 90       	pop	r15
@@ -1110,11 +1363,18 @@ ISR(INT4_vect)
      800:	08 95       	ret
 
 00000802 <motor_controller_set_point>:
+
+void motor_controller_set_point(uint16_t sp)
+{
+	set_point = sp;
      802:	90 93 bc 02 	sts	0x02BC, r25
      806:	80 93 bb 02 	sts	0x02BB, r24
      80a:	08 95       	ret
 
 0000080c <__vector_42>:
+}
+
+ISR(TIMER4_COMPA_vect){
      80c:	1f 92       	push	r1
      80e:	0f 92       	push	r0
      810:	0f b6       	in	r0, 0x3f	; 63
@@ -1134,8 +1394,12 @@ ISR(INT4_vect)
      82c:	bf 93       	push	r27
      82e:	ef 93       	push	r30
      830:	ff 93       	push	r31
+	
+	cli();
      832:	f8 94       	cli
+	motor_controller();
      834:	07 df       	rcall	.-498    	; 0x644 <motor_controller>
+	sei();
      836:	78 94       	sei
      838:	ff 91       	pop	r31
      83a:	ef 91       	pop	r30
@@ -1158,6 +1422,12 @@ ISR(INT4_vect)
      85c:	18 95       	reti
 
 0000085e <motor_reset_encoder>:
+
+
+void motor_set_speed(uint8_t speed)
+{
+	//send speed through DAC/i2C
+	dac_driver_send(speed);
      85e:	e2 e0       	ldi	r30, 0x02	; 2
      860:	f1 e0       	ldi	r31, 0x01	; 1
      862:	80 81       	ld	r24, Z
@@ -1227,11 +1497,18 @@ ISR(INT4_vect)
      8de:	08 95       	ret
 
 000008e0 <motor_get_encoder>:
+uint16_t motor_get_encoder()
+{
+	uint16_t encod_counter;
+	uint8_t LSB_counter;
+	
+	clear_bit(PORTH, MJ1_OE);
      8e0:	e2 e0       	ldi	r30, 0x02	; 2
      8e2:	f1 e0       	ldi	r31, 0x01	; 1
      8e4:	80 81       	ld	r24, Z
      8e6:	8f 7d       	andi	r24, 0xDF	; 223
      8e8:	80 83       	st	Z, r24
+	clear_bit(PORTH, MJ1_SEL);
      8ea:	80 81       	ld	r24, Z
      8ec:	87 7f       	andi	r24, 0xF7	; 247
      8ee:	80 83       	st	Z, r24
@@ -1245,8 +1522,12 @@ ISR(INT4_vect)
      8f2:	2a 95       	dec	r18
      8f4:	f1 f7       	brne	.-4      	; 0x8f2 <motor_get_encoder+0x12>
      8f6:	00 c0       	rjmp	.+0      	; 0x8f8 <motor_get_encoder+0x18>
+	_delay_us(20);
+	encod_counter = PINK;
      8f8:	80 91 06 01 	lds	r24, 0x0106
      8fc:	90 e0       	ldi	r25, 0x00	; 0
+	
+	set_bit(PORTH, MJ1_SEL);
      8fe:	20 81       	ld	r18, Z
      900:	28 60       	ori	r18, 0x08	; 8
      902:	20 83       	st	Z, r18
@@ -1265,36 +1546,69 @@ ISR(INT4_vect)
      910:	e1 f7       	brne	.-8      	; 0x90a <motor_get_encoder+0x2a>
      912:	00 c0       	rjmp	.+0      	; 0x914 <motor_get_encoder+0x34>
      914:	00 00       	nop
+	_delay_ms(20);
+	LSB_counter = PINK;
      916:	20 91 06 01 	lds	r18, 0x0106
+	
+	set_bit(PORTH, MJ1_OE);
      91a:	30 81       	ld	r19, Z
      91c:	30 62       	ori	r19, 0x20	; 32
      91e:	30 83       	st	Z, r19
+	//motor_reset_encoder();
+	
+	//8-bit left shift
+	encod_counter = encod_counter*256;
      920:	98 2f       	mov	r25, r24
      922:	88 27       	eor	r24, r24
+	//add LSB
+	encod_counter += LSB_counter;
+	
+	return encod_counter;
+}
      924:	82 0f       	add	r24, r18
      926:	91 1d       	adc	r25, r1
      928:	08 95       	ret
 
 0000092a <motor_move_joystick>:
+}
+
+void motor_move_joystick(int dir, int8_t speed)
+{
+	//set motor EN to 1
+	set_bit(PORTH, MJ1_EN);
      92a:	e2 e0       	ldi	r30, 0x02	; 2
      92c:	f1 e0       	ldi	r31, 0x01	; 1
      92e:	20 81       	ld	r18, Z
      930:	20 62       	ori	r18, 0x20	; 32
      932:	20 83       	st	Z, r18
+	
+	//printf("SPEED: %d\n\r", speed);
+
+	if (dir == RIGHT)
      934:	82 30       	cpi	r24, 0x02	; 2
      936:	91 05       	cpc	r25, r1
      938:	21 f4       	brne	.+8      	; 0x942 <motor_move_joystick+0x18>
+	{
+		//printf("LEFT:%d\n\r", speed);
+		set_bit(PORTH, MJ1_DIR);
      93a:	80 81       	ld	r24, Z
      93c:	82 60       	ori	r24, 0x02	; 2
      93e:	80 83       	st	Z, r24
      940:	07 c0       	rjmp	.+14     	; 0x950 <motor_move_joystick+0x26>
+	}else if (dir == LEFT)
      942:	01 97       	sbiw	r24, 0x01	; 1
      944:	29 f4       	brne	.+10     	; 0x950 <motor_move_joystick+0x26>
+	{
+		//printf("RIGHT\n\r");
+		clear_bit(PORTH, MJ1_DIR);
      946:	e2 e0       	ldi	r30, 0x02	; 2
      948:	f1 e0       	ldi	r31, 0x01	; 1
      94a:	80 81       	ld	r24, Z
      94c:	8d 7f       	andi	r24, 0xFD	; 253
      94e:	80 83       	st	Z, r24
+	}
+
+	uint8_t speed_converted = (uint8_t) abs((int)(speed*1.3));
      950:	77 27       	eor	r23, r23
      952:	67 fd       	sbrc	r22, 7
      954:	70 95       	com	r23
@@ -1314,45 +1628,86 @@ ISR(INT4_vect)
      970:	33 27       	eor	r19, r19
      972:	26 1b       	sub	r18, r22
      974:	37 0b       	sbc	r19, r23
+
+
+void motor_set_speed(uint8_t speed)
+{
+	//send speed through DAC/i2C
+	dac_driver_send(speed);
      976:	c9 01       	movw	r24, r18
      978:	99 27       	eor	r25, r25
      97a:	56 cd       	rjmp	.-1364   	; 0x428 <dac_driver_send>
      97c:	08 95       	ret
 
 0000097e <motor_move>:
+}
+
+void motor_move(int dir, uint8_t speed)
+{
+	//set motor EN to 1
+	set_bit(PORTH, MJ1_EN);
      97e:	e2 e0       	ldi	r30, 0x02	; 2
      980:	f1 e0       	ldi	r31, 0x01	; 1
      982:	20 81       	ld	r18, Z
      984:	20 62       	ori	r18, 0x20	; 32
      986:	20 83       	st	Z, r18
+	
+	//printf("SPEED: %d\n\r", speed);
+
+	if (dir == RIGHT)
      988:	82 30       	cpi	r24, 0x02	; 2
      98a:	91 05       	cpc	r25, r1
      98c:	21 f4       	brne	.+8      	; 0x996 <motor_move+0x18>
+	{
+		//printf("LEFT:%d\n\r", speed);
+		set_bit(PORTH, MJ1_DIR);
      98e:	80 81       	ld	r24, Z
      990:	82 60       	ori	r24, 0x02	; 2
      992:	80 83       	st	Z, r24
      994:	07 c0       	rjmp	.+14     	; 0x9a4 <motor_move+0x26>
+	}else if (dir == LEFT)
      996:	01 97       	sbiw	r24, 0x01	; 1
      998:	29 f4       	brne	.+10     	; 0x9a4 <motor_move+0x26>
+	{
+		//printf("RIGHT\n\r");
+		clear_bit(PORTH, MJ1_DIR);
      99a:	e2 e0       	ldi	r30, 0x02	; 2
      99c:	f1 e0       	ldi	r31, 0x01	; 1
      99e:	80 81       	ld	r24, Z
      9a0:	8d 7f       	andi	r24, 0xFD	; 253
      9a2:	80 83       	st	Z, r24
+
+
+void motor_set_speed(uint8_t speed)
+{
+	//send speed through DAC/i2C
+	dac_driver_send(speed);
      9a4:	86 2f       	mov	r24, r22
      9a6:	90 e0       	ldi	r25, 0x00	; 0
      9a8:	3f cd       	rjmp	.-1410   	; 0x428 <dac_driver_send>
      9aa:	08 95       	ret
 
 000009ac <control_solenoid>:
+	motor_set_speed(speed);
+}
+
+void control_solenoid(uint8_t push)
+{
+	if (push == 1)
      9ac:	81 30       	cpi	r24, 0x01	; 1
      9ae:	31 f4       	brne	.+12     	; 0x9bc <control_solenoid+0x10>
+	{
+		clear_bit(PORTL, PL0);
      9b0:	eb e0       	ldi	r30, 0x0B	; 11
      9b2:	f1 e0       	ldi	r31, 0x01	; 1
      9b4:	80 81       	ld	r24, Z
      9b6:	8e 7f       	andi	r24, 0xFE	; 254
      9b8:	80 83       	st	Z, r24
      9ba:	08 95       	ret
+	}
+	else
+	{
+		set_bit(PORTL, PL0);
      9bc:	eb e0       	ldi	r30, 0x0B	; 11
      9be:	f1 e0       	ldi	r31, 0x01	; 1
      9c0:	80 81       	ld	r24, Z
@@ -1361,80 +1716,149 @@ ISR(INT4_vect)
      9c6:	08 95       	ret
 
 000009c8 <SPI_MasterTransmit>:
+//TODO - define for register bit (reusable code)
+
+void SPI_MasterTransmit(char cData)
+{
+	/* Start transmission */
+	SPDR = cData;
      9c8:	8e bd       	out	0x2e, r24	; 46
+	/* Wait for transmission complete */
+	while(!(SPSR & (1<<SPIF)));
      9ca:	0d b4       	in	r0, 0x2d	; 45
      9cc:	07 fe       	sbrs	r0, 7
      9ce:	fd cf       	rjmp	.-6      	; 0x9ca <SPI_MasterTransmit+0x2>
+}
      9d0:	08 95       	ret
 
 000009d2 <spi_init>:
+
+
+void spi_init()
+{
+	/* Set MOSI, SCK and SS output all others input */
+	DDRB |= (1<<PB2)|(1<<PB1)|(1<<PB7)|(1<<PB0);
      9d2:	84 b1       	in	r24, 0x04	; 4
      9d4:	87 68       	ori	r24, 0x87	; 135
      9d6:	84 b9       	out	0x04, r24	; 4
+	//Set MISO as input
+	DDRB &= ~(1<<PB3);
      9d8:	23 98       	cbi	0x04, 3	; 4
+	/* Enable SPI, Master, set clock rate fck/16 */
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
      9da:	81 e5       	ldi	r24, 0x51	; 81
      9dc:	8c bd       	out	0x2c, r24	; 44
      9de:	08 95       	ret
 
 000009e0 <spi_send>:
+}
+
+void spi_send(char data)
+{
+	SPI_MasterTransmit(data);
      9e0:	f3 cf       	rjmp	.-26     	; 0x9c8 <SPI_MasterTransmit>
      9e2:	08 95       	ret
 
 000009e4 <spi_read>:
+	
+}
+
+char spi_read()
+{
+	SPI_MasterTransmit(0x00);
      9e4:	80 e0       	ldi	r24, 0x00	; 0
      9e6:	f0 df       	rcall	.-32     	; 0x9c8 <SPI_MasterTransmit>
+	return SPDR;
      9e8:	8e b5       	in	r24, 0x2e	; 46
+}
      9ea:	08 95       	ret
 
 000009ec <timer_driver_init>:
+#include "avr/interrupt.h"
+#include "util.h"
+
+void timer_driver_init()
+{
+	set_bit(DDRE, PE3);
      9ec:	6b 9a       	sbi	0x0d, 3	; 13
+	cli();
      9ee:	f8 94       	cli
+	//TOP = 16MHz/pre-scale/50Hz
+	ICR3 = 39999;
      9f0:	8f e3       	ldi	r24, 0x3F	; 63
      9f2:	9c e9       	ldi	r25, 0x9C	; 156
      9f4:	90 93 97 00 	sts	0x0097, r25
      9f8:	80 93 96 00 	sts	0x0096, r24
+	
+	//duty_cycle
+	OCR3A = 3999;
      9fc:	8f e9       	ldi	r24, 0x9F	; 159
      9fe:	9f e0       	ldi	r25, 0x0F	; 15
      a00:	90 93 99 00 	sts	0x0099, r25
      a04:	80 93 98 00 	sts	0x0098, r24
+	
+	//Set pre-scale to 8
+	clear_bit(TCCR3B, CS30);
      a08:	a1 e9       	ldi	r26, 0x91	; 145
      a0a:	b0 e0       	ldi	r27, 0x00	; 0
      a0c:	8c 91       	ld	r24, X
      a0e:	8e 7f       	andi	r24, 0xFE	; 254
      a10:	8c 93       	st	X, r24
+	set_bit(TCCR3B, CS31);
      a12:	8c 91       	ld	r24, X
      a14:	82 60       	ori	r24, 0x02	; 2
      a16:	8c 93       	st	X, r24
+	clear_bit(TCCR3B, CS32);
      a18:	8c 91       	ld	r24, X
      a1a:	8b 7f       	andi	r24, 0xFB	; 251
      a1c:	8c 93       	st	X, r24
+	
+	//Set mode of operation to 14 (Fast PWM with ICRn)
+	set_bit(TCCR3A, WGM31);
      a1e:	e0 e9       	ldi	r30, 0x90	; 144
      a20:	f0 e0       	ldi	r31, 0x00	; 0
      a22:	80 81       	ld	r24, Z
      a24:	82 60       	ori	r24, 0x02	; 2
      a26:	80 83       	st	Z, r24
+	clear_bit(TCCR3A, WGM30);
      a28:	80 81       	ld	r24, Z
      a2a:	8e 7f       	andi	r24, 0xFE	; 254
      a2c:	80 83       	st	Z, r24
+	TCCR3B |= (1 << WGM33) | (1 << WGM32);
      a2e:	8c 91       	ld	r24, X
      a30:	88 61       	ori	r24, 0x18	; 24
      a32:	8c 93       	st	X, r24
+	
+	//Enable compare interruption on reg OCRnA
+	set_bit(TCCR3A, COM3A1);
      a34:	80 81       	ld	r24, Z
      a36:	80 68       	ori	r24, 0x80	; 128
      a38:	80 83       	st	Z, r24
+	clear_bit(TCCR3A, COM3A0);
      a3a:	80 81       	ld	r24, Z
      a3c:	8f 7b       	andi	r24, 0xBF	; 191
      a3e:	80 83       	st	Z, r24
+
+	sei();
      a40:	78 94       	sei
      a42:	08 95       	ret
 
 00000a44 <timer_driver_set_duty_cycle>:
+}
+
+void timer_driver_set_duty_cycle(int8_t position)
+{
+	int duty_cycle = 20 * position + 1999;
      a44:	24 e1       	ldi	r18, 0x14	; 20
      a46:	82 02       	muls	r24, r18
      a48:	c0 01       	movw	r24, r0
      a4a:	11 24       	eor	r1, r1
      a4c:	81 53       	subi	r24, 0x31	; 49
      a4e:	98 4f       	sbci	r25, 0xF8	; 248
+	//int duty_cycle = 20 * (100 - position) + 1999;
+	//printf("%d\n\r", duty_cycle);
+	
+	if (duty_cycle < 1999)
      a50:	8f 3c       	cpi	r24, 0xCF	; 207
      a52:	27 e0       	ldi	r18, 0x07	; 7
      a54:	92 07       	cpc	r25, r18
@@ -1446,8 +1870,13 @@ ISR(INT4_vect)
      a60:	8f e9       	ldi	r24, 0x9F	; 159
      a62:	9f e0       	ldi	r25, 0x0F	; 15
      a64:	02 c0       	rjmp	.+4      	; 0xa6a <timer_driver_set_duty_cycle+0x26>
+		duty_cycle = 1999;
      a66:	8f ec       	ldi	r24, 0xCF	; 207
      a68:	97 e0       	ldi	r25, 0x07	; 7
+	else if (duty_cycle > 3999)
+		duty_cycle = 3999;
+	
+	OCR3A = (uint16_t) duty_cycle;
      a6a:	90 93 99 00 	sts	0x0099, r25
      a6e:	80 93 98 00 	sts	0x0098, r24
      a72:	08 95       	ret
@@ -1600,30 +2029,63 @@ ISR(INT4_vect)
      bd0:	18 95       	reti
 
 00000bd2 <USART_Transmit>:
+}
+
+void USART_Transmit(unsigned char data)
+{
+	/* Wait for empty transmit buffer */
+	while ( !( UCSR0A & (1<<UDRE0)) );
      bd2:	e0 ec       	ldi	r30, 0xC0	; 192
      bd4:	f0 e0       	ldi	r31, 0x00	; 0
      bd6:	90 81       	ld	r25, Z
      bd8:	95 ff       	sbrs	r25, 5
      bda:	fd cf       	rjmp	.-6      	; 0xbd6 <USART_Transmit+0x4>
+	/* Put data into buffer, sends the data */
+	UDR0 = data;
      bdc:	80 93 c6 00 	sts	0x00C6, r24
      be0:	08 95       	ret
 
 00000be2 <USART_Receive>:
+}
+
+unsigned char USART_Receive(void)
+{
+	/* Wait for data to be received */
+	while ( !(UCSR0A & (1<<RXC0)) )
      be2:	e0 ec       	ldi	r30, 0xC0	; 192
      be4:	f0 e0       	ldi	r31, 0x00	; 0
      be6:	80 81       	ld	r24, Z
      be8:	88 23       	and	r24, r24
      bea:	ec f7       	brge	.-6      	; 0xbe6 <USART_Receive+0x4>
+	;
+	/* Get and return received data from buffer */
+	return UDR0;
      bec:	80 91 c6 00 	lds	r24, 0x00C6
+}
      bf0:	08 95       	ret
 
 00000bf2 <USART_Init>:
+#include "avr/io.h"
+
+void USART_Init(unsigned int ubrr)
+{
+	/* Set baud rate */
+	UBRR0H = (unsigned char) (ubrr >> 8);
      bf2:	90 93 c5 00 	sts	0x00C5, r25
+	UBRR0L = (unsigned char) ubrr;
      bf6:	80 93 c4 00 	sts	0x00C4, r24
+	
+	/* Enable receiver and transmitter */
+	UCSR0B = (1 << RXEN0)|(1 << TXEN0);
      bfa:	88 e1       	ldi	r24, 0x18	; 24
      bfc:	80 93 c1 00 	sts	0x00C1, r24
+	
+	/* Set frame format: 8data, 2stop bit */
+	UCSR0C = (1 << USBS0)|(3 << UCSZ00);
      c00:	8e e0       	ldi	r24, 0x0E	; 14
      c02:	80 93 c2 00 	sts	0x00C2, r24
+	
+	fdevopen(USART_Transmit, USART_Receive);
      c06:	61 ef       	ldi	r22, 0xF1	; 241
      c08:	75 e0       	ldi	r23, 0x05	; 5
      c0a:	89 ee       	ldi	r24, 0xE9	; 233
