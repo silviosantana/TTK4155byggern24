@@ -2,10 +2,10 @@
 
 #include <stdint.h>
 
+#include "util.h"
 #include "avr/io.h"
 #include "util/delay.h"
 #include "spi_driver.h"
-#include "util.h"
 #include "MCP2515.h"
 
 #define CAN_CS PB7
@@ -21,8 +21,6 @@ void can_controller_reset()
 uint8_t can_controller_init()
 {
 	uint8_t value;
-
-	//spi_init(); // Initialize SPI
 	can_controller_reset(); // Send reset-command
 	
 
@@ -34,15 +32,10 @@ uint8_t can_controller_init()
 		return 1;
 	}
 	
-	//printf("mode value: %d\n\r", (value & MODE_MASK));
-	
 	//turn RXM1 and RXM0 to 11 to turn off filters and receive any messages
 	can_controller_bit_modify(MCP_CANINTE, 0b11111111, 0b00000001);
 	can_controller_bit_modify(MCP_RXB0CTRL, 0b01100100, 0b01100100);
-	//printf("RBX0CTRL: %02x\n\r", can_controller_read(MCP_RXB0CTRL));
 	can_controller_bit_modify(MCP_RXB1CTRL, 0b01100000, 0b01100000);
-	//printf("RBX1CTRL: %02x\n\r", can_controller_read(MCP_RXB1CTRL));
-
 	
 	//Set lower ID reg to zero
 	can_controller_write(MCP_TXB0SIDL, 0x00);

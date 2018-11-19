@@ -12,9 +12,9 @@
 
 void can_controller_reset()
 {
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
+	clear_bit(PORTB, CAN_CS); // Select CAN-controller
 	spi_send(MCP_RESET);
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
+	set_bit(PORTB, CAN_CS); // Deselect CAN-controller
 	_delay_ms(10);
 }
 
@@ -52,13 +52,13 @@ uint8_t can_controller_read(uint8_t address)
 {
 	uint8_t result;
 
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
+	clear_bit(PORTB, CAN_CS); // Select CAN-controller
 
 	spi_send(MCP_READ); // Send read instruction
 	spi_send(address); // Send address
 	result = spi_read(); // Read result
 
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
+	set_bit(PORTB, CAN_CS); // Deselect CAN-controller
 
 	return result;
 }
@@ -73,7 +73,7 @@ uint8_t can_controller_set_mode(uint8_t mode)
 
 void can_controller_request_to_send()
 {
-		PORTB &= ~(1<<CAN_CS);
+		clear_bit(PORTB, CAN_CS); // Select CAN-controller
 		
 		// The buffer types are MCP_RTS_TX0, MCP_RTS_TX1, MCP_RTS_TX2 and MCP_RTS_ALL
 		spi_send(MCP_RTS_TX0);
@@ -83,21 +83,21 @@ void can_controller_request_to_send()
 
 void can_controller_bit_modify(uint8_t address, uint8_t mask, uint8_t data)
 {
-		PORTB &= ~(1<<CAN_CS); // Select CAN-controller
+		clear_bit(PORTB, CAN_CS); // Select CAN-controller
 
 		spi_send(MCP_BITMOD); // Send read instruction
 		spi_send(address); // Send address
 		spi_send(mask); // Send mask,
 		spi_send(data); // Send data
-
-		PORTB |= (1<<CAN_CS); // Deselect CAN-controller
+		
+		set_bit(PORTB, CAN_CS); // Deselect CAN-controller
 }
 
 uint8_t can_controller_read_status()
 {
 	uint8_t status;
 
-	PORTB &= ~(1<<CAN_CS);
+	clear_bit(PORTB, CAN_CS); // Select CAN-controller
 	
 	spi_send(MCP_CANSTAT);
 	status = spi_read();
@@ -109,18 +109,18 @@ uint8_t can_controller_read_status()
 
 void can_controller_write(uint8_t address, uint8_t data)
 {
-	PORTB &= ~(1<<CAN_CS); // Select CAN-controller
+	clear_bit(PORTB, CAN_CS); // Select CAN-controller
 	
 	spi_send(MCP_WRITE);
 	spi_send(address);
 	spi_send(data);
 
-	PORTB |= (1<<CAN_CS); // Deselect CAN-controller
+	set_bit(PORTB, CAN_CS); // Deselect CAN-controller
 }
 
 void can_controller_load_ID_to_buffer(uint8_t buffer, uint8_t* id)
 {
-	PORTB &= ~(1 << CAN_CS);
+	clear_bit(PORTB, CAN_CS); // Select CAN-controller
 
 	switch (buffer)
 	{
@@ -146,7 +146,7 @@ void can_controller_load_ID_to_buffer(uint8_t buffer, uint8_t* id)
 
 void can_controller_load_data_to_buffer(uint8_t buffer, uint8_t* data)
 {
-	PORTB &= ~(1 << CAN_CS);
+	clear_bit(PORTB, CAN_CS); // Select CAN-controller
 
 	switch (buffer)
 	{

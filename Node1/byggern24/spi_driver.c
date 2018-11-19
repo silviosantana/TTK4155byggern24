@@ -1,5 +1,6 @@
 #include "spi_driver.h"
 
+#include "util.h"
 #include "avr/io.h"
 #include "util/delay.h"
 
@@ -11,7 +12,7 @@ void SPI_MasterInit(void)
     DDRB = (1<<DDB5)|(1<<DDB7)|(1<<DDB4);
 	
 	//Set MISO as input 
-	DDRB &= ~(1<<DDB6);
+	clear_bit(DDRB, DDB6);
 	
     /* Enable SPI, Master, set clock rate fck/16 */
     SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
@@ -24,24 +25,6 @@ void SPI_MasterTransmit(char cData)
     /* Wait for transmission complete */
     while(!(SPSR & (1<<SPIF)));
 }
-
-// void SPI_SlaveInit(void)
-// {
-//     /* Set MISO output, all others input */
-//     DDRB = (1<<DDB6);
-//     /* Enable SPI */
-//     SPCR = (1<<SPE);
-// }
-// 
-// char SPI_SlaveReceive(void)
-// {
-//     /* Wait for reception complete */
-//     while(!(SPSR & (1<<SPIF)))
-//         ;
-//     /* Return data register */
-//     return SPDR;
-// }
-
 
 void spi_init()
 {
@@ -63,7 +46,7 @@ char spi_read()
 void spi_test()
 {
 	char data = 0xd5;
-	PORTB &= ~(1 << 4);	
+	clear_bit(PORTB, 4);
 	spi_send(data);
-	PORTB |= (1 << 4);
+	set_bit(PORTB, 4);
 }

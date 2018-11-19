@@ -140,7 +140,6 @@ void oled_print_char(char character, int size)
 			oled_write_data(mychar);
 		}
 	}
-	
 }
 
 void oled_print_special_char (int code)
@@ -217,7 +216,6 @@ void oled_line(int x0, int y0, int x1, int y1)
 		printf("x: %d, y: %d\n\r", temp_x, temp_y);
 		write_pixel(temp_x, temp_y);
 	}
-	
 }
 
 //draw a circle
@@ -233,14 +231,11 @@ void oled_circle(int x, int y, int r)
 			if ((temp_x * temp_x + temp_y * temp_y) == (r * r))
 			{
 				write_pixel(x + temp_x, y + temp_y);
-				
 			}
 			else if  (((temp_x * temp_x + temp_y * temp_y) <= (r * r) + r/2) && (((temp_x * temp_x + temp_y * temp_y) >= (r * r) - r/2)))
 			{
 				write_pixel(x + temp_x, y + temp_y);
-				
 			}
-				
 		}
 	}
 }
@@ -294,18 +289,7 @@ void oled_print_mario_large(uint8_t row,uint8_t column)
 void oled_test()
 {
 	oled_reset();
-	/*oled_write_cmd(0x22);
-	oled_write_cmd(0x00);
-	oled_write_cmd(0x05);*/
-
-	//oled_print_arrow(2, 64);
 	oled_animate_mario_large();
-
-	//oled_line(65, 63, 26, 12);
-	//oled_circle(80,30,21);
-	
-	//oled_clear_line(6);
-	//oled_write_cmd(0x40);
 }
 
 void oled_print_ntnu_logo(uint8_t row, uint8_t column)

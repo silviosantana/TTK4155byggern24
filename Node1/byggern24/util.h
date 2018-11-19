@@ -19,7 +19,7 @@ struct Position
 	int y;
 };
 
-enum direction {NEUTRAL, LEFT, RIGHT, UP, DOWN};
+typedef enum Direction {NEUTRAL, LEFT, RIGHT, UP, DOWN} direction;
 
 typedef struct Menu
 {
@@ -34,5 +34,8 @@ typedef struct {
 	uint8_t length;
 	uint8_t data[8];
 } can_message;
+
+menu* main_state;
+int8_t gamemode;
 
 #endif // UTIL_H_

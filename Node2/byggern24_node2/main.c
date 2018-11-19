@@ -1,7 +1,7 @@
+#include "util.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 #include "util/delay.h"
-#include "util.h"
 #include "usart_driver.h"
 #include "can_controller_driver.h"
 #include "can_driver.h"
@@ -12,6 +12,9 @@
 #include "TWI_Master.h";
 #include "motor_driver.h";
 #include "motor_controller.h"
+
+int calibrate = 0;
+int new_mode = 0;
 
 int main(void)
 {
@@ -25,24 +28,24 @@ int main(void)
 	motor_init();
 	can_controller_init();
 	can_init();
-	game_init();
 	motor_controller_init();
 	sei();
 	
 	printf("Hello from node 2!\n\r");
 	
-	uint16_t score = 0;
+	uint16_t score = 0, prev_score = 0;
 	//uint16_t value = 0;
 	
 	while (1)
 	{
 		score = record_score(score);
-		//printf("ADC read: %d\t Score: %d\n\r", adc_read(0), score);
-		
-		//motor_driver_test();
-		//value = value + 1;
- 		//dac_driver_send(value);
- 		//printf("%d\n\r", value);
+		if (score != prev_score)
+		{
+			uint8_t score_msg = (uint8_t) score;
+			can_message score_can = {1, 1, score_msg};
+			can_send_msg(&score_can);
+			prev_score = score;
+		}
 		_delay_ms(500);
 		
 	}

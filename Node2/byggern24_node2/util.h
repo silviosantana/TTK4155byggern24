@@ -36,4 +36,7 @@ typedef struct {
 	uint8_t data[8];
 } can_message;
 
+
+extern int calibrate;
+extern int new_mode;
 #endif // UTIL_H_

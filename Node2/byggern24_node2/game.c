@@ -8,22 +8,19 @@
 
 int game_mode;
 
-void game_init(){
-	game_mode = 1;
+void set_game_mode(int gm)
+{
+	game_mode = gm;
 }
 
 void game_toggle_mode()
 {
-	if (game_mode == 1)
+	if (game_mode == 2)
 	{
 		game_mode = 0;
-		//printf("1 -> 0\n\r");
-		//motor_controller_deactivate();
 	}else
 	{
-		game_mode = 1;
-		//printf("0 -> 1\n\r");
-		//motor_controller_activate();
+		game_mode = 2;
 	}
 	
 }

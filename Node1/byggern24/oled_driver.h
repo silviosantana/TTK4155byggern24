@@ -27,4 +27,5 @@ void oled_test();
 void oled_print_ntnu_logo(uint8_t row, uint8_t column);
 void oled_animate_ntnu();
 void oled_ingame_display(int score);
+
 #endif // OLED_DRIVER_H_

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "util.h"
 #include "avr/io.h"
 
 void USART_Init(unsigned int ubrr)

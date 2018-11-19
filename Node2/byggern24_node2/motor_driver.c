@@ -101,15 +101,12 @@ void motor_move_joystick(int dir, int8_t speed)
 	//set motor EN to 1
 	set_bit(PORTH, MJ1_EN);
 	
-	//printf("SPEED: %d\n\r", speed);
 
 	if (dir == RIGHT)
 	{
-		//printf("LEFT:%d\n\r", speed);
 		set_bit(PORTH, MJ1_DIR);
 	}else if (dir == LEFT)
 	{
-		//printf("RIGHT\n\r");
 		clear_bit(PORTH, MJ1_DIR);
 	}
 
@@ -122,16 +119,12 @@ void motor_move(int dir, uint8_t speed)
 {
 	//set motor EN to 1
 	set_bit(PORTH, MJ1_EN);
-	
-	//printf("SPEED: %d\n\r", speed);
 
 	if (dir == RIGHT)
 	{
-		//printf("LEFT:%d\n\r", speed);
 		set_bit(PORTH, MJ1_DIR);
 	}else if (dir == LEFT)
 	{
-		//printf("RIGHT\n\r");
 		clear_bit(PORTH, MJ1_DIR);
 	}
 

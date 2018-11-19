@@ -1,8 +1,8 @@
 #include "spi_driver.h"
 
+#include "util.h"
 #include "avr/io.h"
 #include "util/delay.h"
-#include "util.h"
 
 //TODO - define for register bit (reusable code)
 
@@ -13,23 +13,6 @@ void SPI_MasterTransmit(char cData)
 	/* Wait for transmission complete */
 	while(!(SPSR & (1<<SPIF)));
 }
-
-// void SPI_SlaveInit(void)
-// {
-//     /* Set MISO output, all others input */
-//     DDRB = (1<<DDB6);
-//     /* Enable SPI */
-//     SPCR = (1<<SPE);
-// }
-//
-// char SPI_SlaveReceive(void)
-// {
-//     /* Wait for reception complete */
-//     while(!(SPSR & (1<<SPIF)))
-//         ;
-//     /* Return data register */
-//     return SPDR;
-// }
 
 
 void spi_init()

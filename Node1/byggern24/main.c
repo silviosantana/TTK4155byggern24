@@ -36,39 +36,20 @@ int main(void)
 	can_controller_init();
 	can_init();
 	music_init();
+	stop_music();
 	printf("START ============================\n\r");
 	
 	int arrow_pos = 2;
 	int arrow_max = 2;
+	gamemode = 1;
+	menu_state_machine_setup(&arrow_max, &arrow_pos);
 	
-	menu* current_state = menu_state_machine_setup(&arrow_max, arrow_pos);
-	
-	enum direction dir = NEUTRAL;
-	enum direction old_dir = NEUTRAL;
- 	oled_animate_ntnu();
-	_delay_ms(1000);
-	play_music(1);
- 	oled_animate_mario_large();
-// 	play_music(0);
-// 	_delay_ms(10000);
-// 	stop_music();
-// 	_delay_ms(1000);
-// 	play_music(1);
-	
+	direction dir = NEUTRAL;
+	direction old_dir = NEUTRAL;
+
 	while (1)
 	{
-		send_multi_board();
-		_delay_ms(50);
-
-		old_dir = dir;
-		dir = get_joystick_direction();
-		
-		if (old_dir == NEUTRAL)
-		{
-			current_state = menu_move_arrow(dir, current_state, &arrow_max, &arrow_pos);
-		}
-
-		
+		menu_state_machine(&old_dir, &dir, &arrow_max, &arrow_pos);
 	}
 
 	printf("END ==============================\n\r");

@@ -93,7 +93,7 @@ void joystick_test()
 		j_pos = get_joystick_position();
 		sliderL = get_left_slider();
 		sliderR = get_right_slider();
-		enum direction dir = get_joystick_direction();
+		direction dir = get_joystick_direction();
 		printf("\r\nX: %d\t|\tY: %d\t|\tSL: %d\t|\tSR: %d |\tdir: %d", j_pos.x, j_pos.y, sliderL, sliderR, dir);
 	}
 }

@@ -33,13 +33,5 @@ void dac_driver_send(uint8_t data)
 	
 	TWI_Start_Transceiver_With_Data( msg, 3);
 	
-// 	if (has_data == 1)
-// 	{
-// 		TWI_Start_Transceiver_With_Data( msg, 3);
-// 	}else
-// 	{
-// 		TWI_Start_Transceiver_With_Data( msg, 2);
-// 	}
-
 }
 

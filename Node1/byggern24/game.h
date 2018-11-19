@@ -5,11 +5,13 @@
 
 int score;
 
+void send_input_info();
 void send_multi_board();
 
-menu* menu_set_state(menu* current_state, int* arrow_max, int arrow_pos);
-menu* menu_move_arrow(int dir, menu* current_state, int* arrow_max, int* arrow_pos);
-menu* menu_state_machine_setup();
+void menu_state_machine_setup(int* arrow_max, int* arrow_pos);
+void menu_state_machine(direction* old_dir, direction* dir, int* arrow_max, int* arrow_pos);
+void menu_set_state(menu* current_state, int* arrow_max, int* arrow_pos);
+void menu_move_arrow(direction* dir, int* arrow_max, int* arrow_pos);
 void menu_intro_screen();
 void music_init();
 void start_game();

@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "util.h"
 #include "avr/io.h"
 #include "util/delay.h"
 #include "sram_driver.h"
@@ -10,7 +11,7 @@
 void ADC_init ()
 {
 	//Enable interruption
-	GICR |= (1 << INT1);
+	set_bit(GICR, INT1);
 }
 
 unsigned int ADC_read (unsigned int chn)

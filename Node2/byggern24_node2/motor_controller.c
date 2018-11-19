@@ -44,7 +44,6 @@ void motor_controller_init()
 	
 	motor_controller_calibration();
 	
-	
 	TCCR4A |= 0;
 	// set up timer with prescaler = 64 and CTC mode
 	TCCR4B |= (1 << WGM42)|(1 << CS41)|(1 << CS40);

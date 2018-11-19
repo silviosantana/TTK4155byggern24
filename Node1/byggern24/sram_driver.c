@@ -2,15 +2,16 @@
 
 #include <stdint.h>
 
+#include "util.h"
 #include "avr/io.h" 
 
 void SRAM_init()
 {
 	//Enable XMEM
-	MCUCR |= (1 << SRE); 
+	set_bit(MCUCR, SRE);
 	
 	//Mask JTAG pins
-	SFIOR |= (1 << XMM2) | (0 << XMM1) | (0 << XMM0);	
+	SFIOR |= (1 << XMM2) | (0 << XMM1) | (0 << XMM0);
 }
 
 void SRAM_write(uint16_t address, uint8_t data)
@@ -52,20 +53,6 @@ void SRAM_test()
 		}
 	}
 	// Retrieval phase: Check that no values were changed during or after the write phase
-	
 	srand(seed);
-	// reset the PRNG to the state it had before the write phase
-	
-// 	for (uint16_t i = 0; i < ext_ram_size; i++) {
-// 		uint8_t some_value = rand();
-// 		uint8_t retreived_value = ext_ram[i];
-// 		
-// 		if (retreived_value != some_value) {
-// 			printf("Retrieval phase error: ext_ram[%4d] = %02X (should be %02X)\n\r", i, retreived_value, some_value);
-// 			retrieval_errors++;
-// 		}
-// 	}
-	
 	printf("SRAM test completed with \n%4d errors in write phase and \n%4d errors in retrieval phase\n\n", write_errors, retrieval_errors);
-
 }

@@ -2,6 +2,7 @@
 #define CAN_DRIVER_H_
 
 #include <stdint.h>
+
 #include "util.h"
 void can_init();
 uint8_t can_send_msg(can_message* msg);
